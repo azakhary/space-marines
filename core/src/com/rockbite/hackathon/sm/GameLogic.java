@@ -81,7 +81,8 @@ public class GameLogic implements Observer  {
                 @Override
                 public void call(Object... args) {
                     socket.emit("join", "{'user_id': " + uniqueUserId + "}");
-                    socket.disconnect();
+                    System.out.println("connected to socket. waiting for opponent.");
+                    //socket.disconnect();
                 }
 
             }).on("game_started", new Emitter.Listener() {
@@ -91,6 +92,7 @@ public class GameLogic implements Observer  {
                     JSONObject obj = (JSONObject)args[0];
                     try {
                         int user_id = obj.getInt("user_id");
+                        System.out.println("room created with opponent id: " + user_id);
                         opponentUserId = user_id;
                         initGameEntities();
                     } catch (JSONException e) {
@@ -191,7 +193,7 @@ public class GameLogic implements Observer  {
             Entity emojiEntity = engine.createEntity();
             emojiEntity.add(new EmojiComponent(emojiShown));
             engine.addEntity(emojiEntity);
-            System.out.println(emojiShown.getEmojiCode() + ""); // TODO: remove this
+            System.out.println("emoji code: " + emojiShown.getEmojiCode() + ""); // TODO: remove this
         }
     }
 
