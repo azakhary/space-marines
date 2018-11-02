@@ -2,6 +2,7 @@ package com.rockbite.hackathon.sm.communications;
 
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Queue;
+import com.rockbite.hackathon.sm.GameLogic;
 
 import java.util.HashMap;
 
@@ -16,6 +17,8 @@ public class Comm {
     private CommandPool commandPool;
 
     private Queue<Action> actionQueue;
+
+    public GameLogic gameLogic;
 
     private Comm() {
         observerMap = new HashMap<Class<? extends Action>, ObjectSet<Observer>>();
@@ -79,5 +82,9 @@ public class Comm {
 
     public <T extends Command> T getCommand(Class<T> clazz) {
         return commandPool.obtain(clazz);
+    }
+
+    public static void injectGameLogic(GameLogic gameLogic) {
+        get().gameLogic = gameLogic;
     }
 }

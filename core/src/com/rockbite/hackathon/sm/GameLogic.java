@@ -21,8 +21,14 @@ import com.rockbite.hackathon.sm.systems.HeroSystem;
 import com.rockbite.hackathon.sm.systems.MinionSystem;
 import com.rockbite.hackathon.sm.systems.SpellSystem;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URISyntaxException;
+
 import io.socket.client.IO;
 import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 public class GameLogic implements Observer  {
 
@@ -34,6 +40,8 @@ public class GameLogic implements Observer  {
     private Array<Array<Entity>> cards;
 
     private int uniqueUserId;
+
+    private int opponentUserId;
 
     public static final int BOTTOM_PLAYER = 0;
     public static final int TOP_PLAYER = 1;
@@ -58,9 +66,6 @@ public class GameLogic implements Observer  {
         engine.addSystem(emojiSystem);
 
         registerActionChannels();
-
-        //TODO: remove, this is for test
-        //Comm.get().executeCommand(SendEmoji.make((short)11));
     }
 
     public void initGameSession() {
@@ -68,7 +73,58 @@ public class GameLogic implements Observer  {
         uniqueUserId = MathUtils.random(1, 100000);
 
         // connect to server and ask for room
-        //socket = IO.socket("10.10.29.151:5555");
+        try {
+            socket = IO.socket("http://10.10.29.151:5555");
+
+            socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {
+                    socket.emit("join", "{'user_id': " + uniqueUserId + "}");
+                    socket.disconnect();
+                }
+
+            }).on("game_started", new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {
+                    JSONObject obj = (JSONObject)args[0];
+                    try {
+                        int user_id = obj.getInt("user_id");
+                        opponentUserId = user_id;
+                        initGameEntities();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }).on("show_emoji", new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {
+                    JSONObject obj = (JSONObject)args[0];
+                    short emojiCode = 0;
+                    try {
+                        emojiCode = (short) obj.getInt("emoji_code");
+                        EmojiShown action = Comm.get().getAction(EmojiShown.class);
+                        action.set(emojiCode);
+                        Comm.get().sendAction(action);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {}
+
+            });
+            socket.connect();
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
     public void initGameEntities() {
@@ -137,5 +193,9 @@ public class GameLogic implements Observer  {
             engine.addEntity(emojiEntity);
             System.out.println(emojiShown.getEmojiCode() + ""); // TODO: remove this
         }
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }

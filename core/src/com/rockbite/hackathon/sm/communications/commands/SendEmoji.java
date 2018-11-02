@@ -18,7 +18,8 @@ public class SendEmoji extends Command {
 
     @Override
     public void execute() {
-        // TODO: temp test execution
+        Comm.get().gameLogic.getSocket().emit("send_emoji", "{'emoji_code': " + emojiCode + "}");
+
         EmojiShown action = Comm.get().getAction(EmojiShown.class);
         action.set(emojiCode);
         Comm.get().sendAction(action);

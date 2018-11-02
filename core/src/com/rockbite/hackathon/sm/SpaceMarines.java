@@ -4,8 +4,10 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.rockbite.hackathon.sm.communications.Comm;
 import com.rockbite.hackathon.sm.communications.Command;
+import com.rockbite.hackathon.sm.communications.commands.SendEmoji;
 import com.rockbite.hackathon.sm.systems.RenderSystem;
 
 public class SpaceMarines extends ApplicationAdapter {
@@ -23,6 +25,7 @@ public class SpaceMarines extends ApplicationAdapter {
 
 		RenderSystem renderSystem = new RenderSystem();
 		engine.addSystem(renderSystem);
+		Comm.injectGameLogic(gameLogic);
 
 		gameLogic.initGameSession(); // TODO: this has to be done at other point when integrated with backend API
 	}
@@ -31,6 +34,11 @@ public class SpaceMarines extends ApplicationAdapter {
 	public void render () {
 		Comm.get().update();
 		engine.update(Gdx.graphics.getDeltaTime());
+
+		//TODO: remove
+		if(Gdx.input.isKeyPressed(Input.Keys.E)) {
+			Comm.get().executeCommand(SendEmoji.make((short)1));
+		}
 	}
 	
 	@Override
