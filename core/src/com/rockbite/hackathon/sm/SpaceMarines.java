@@ -36,7 +36,8 @@ public class SpaceMarines extends ApplicationAdapter {
 		engine.update(Gdx.graphics.getDeltaTime());
 
 		//TODO: remove
-		if(Gdx.input.isKeyPressed(Input.Keys.E)) {
+		if(Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+			System.out.println("BOBR");
 			Comm.get().executeCommand(SendEmoji.make((short)1));
 		}
 	}

@@ -27,6 +27,7 @@ public abstract class Action implements Pool.Poolable {
 
     @Override
     public void reset() {
-
+        isDoneDisplaying = false;
+        isDoneSending = false;
     }
 }

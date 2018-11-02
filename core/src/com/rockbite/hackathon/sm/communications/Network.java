@@ -68,7 +68,9 @@ public class Network {
             }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {}
+                public void call(Object... args) {
+                    System.out.println("server disconnected for no reason");
+                }
 
             });
             socket.connect();
