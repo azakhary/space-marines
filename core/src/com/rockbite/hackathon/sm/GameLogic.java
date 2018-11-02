@@ -80,9 +80,15 @@ public class GameLogic implements Observer  {
 
                 @Override
                 public void call(Object... args) {
-                    socket.emit("join", "{'user_id': " + uniqueUserId + "}");
                     System.out.println("connected to socket. waiting for opponent.");
-                    //socket.disconnect();
+
+                    JSONObject payload = new JSONObject();
+                    try {
+                        payload.put("user_id", uniqueUserId);
+                        socket.emit("join", payload);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
 
             }).on("game_started", new Emitter.Listener() {
@@ -178,6 +184,8 @@ public class GameLogic implements Observer  {
         engine.removeSystem(engine.getSystem(MinionSystem.class));
         engine.removeSystem(engine.getSystem(HeroSystem.class));
         engine.removeSystem(engine.getSystem(EmojiSystem.class));
+
+        socket.disconnect();
     }
 
     @Override

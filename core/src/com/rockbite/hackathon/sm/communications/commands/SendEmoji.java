@@ -4,6 +4,9 @@ import com.rockbite.hackathon.sm.communications.Comm;
 import com.rockbite.hackathon.sm.communications.Command;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class SendEmoji extends Command {
 
     private short emojiCode;
@@ -18,7 +21,13 @@ public class SendEmoji extends Command {
 
     @Override
     public void execute() {
-        Comm.get().gameLogic.getSocket().emit("send_emoji", "{'emoji_code': " + emojiCode + "}");
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put("emoji_code", emojiCode);
+            Comm.get().gameLogic.getSocket().emit("send_emoji", payload);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         EmojiShown action = Comm.get().getAction(EmojiShown.class);
         action.set(emojiCode);
