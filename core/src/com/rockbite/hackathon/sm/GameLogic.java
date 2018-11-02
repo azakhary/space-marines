@@ -11,6 +11,7 @@ import com.rockbite.hackathon.sm.communications.Network;
 import com.rockbite.hackathon.sm.communications.Observer;
 import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
+import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
 import com.rockbite.hackathon.sm.communications.commands.SendEmoji;
 import com.rockbite.hackathon.sm.components.CardComponent;
 import com.rockbite.hackathon.sm.components.DeckComponent;
@@ -120,6 +121,7 @@ public class GameLogic implements Observer  {
     public void registerActionChannels() {
         Comm.get().registerObserver(this, EmojiShown.class);
         Comm.get().registerObserver(this, CardDrawn.class);
+        Comm.get().registerObserver(this, MinionUpdate.class);
     }
 
     @Override
@@ -139,13 +141,21 @@ public class GameLogic implements Observer  {
             Entity cardEntity = engine.createEntity();
             cardEntity.add(cardDrawn.getComponent());
             TransformComponent transformComponent = engine.createComponent(TransformComponent.class);
-            transformComponent.width = 1f;
-            transformComponent.height = 1.31f;
+            transformComponent.width = 100f;
+            transformComponent.height = 131f;
             cardEntity.add(transformComponent);
             engine.addEntity(cardEntity);
 
             System.out.println("draw card " + cardDrawn.getComponent().title);
             cardDrawn.setDoneDisplaying(true);
+        }
+
+        if(action instanceof MinionUpdate) {
+            MinionUpdate minionUpdate = (MinionUpdate) action;
+
+            engine.getSystem(MinionSystem.class).updateMinionData(minionUpdate);
+
+            minionUpdate.setDoneDisplaying(true);
         }
     }
 
@@ -178,8 +188,8 @@ public class GameLogic implements Observer  {
         MinionComponent minionComponent = engine.createComponent(MinionComponent.class);
         TransformComponent transformComponent = engine.createComponent(TransformComponent.class);
         transformComponent.reset();
-        transformComponent.width = 1.2f;
-        transformComponent.height = 1.2f * 1.31f;
+        transformComponent.width = 120f;
+        transformComponent.height = 120f * 1.31f;
         minionComponent.set(user_id, minionJson);
         minion.add(minionComponent);
         minion.add(transformComponent);

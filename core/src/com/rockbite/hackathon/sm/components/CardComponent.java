@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 public class CardComponent implements Component {
 
-    public long playerId;
+    public int playerId;
 
     public int slot;
 

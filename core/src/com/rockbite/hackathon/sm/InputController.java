@@ -35,6 +35,9 @@ public class InputController {
 
 
     public void update(double deltaTime) {
+        int currPlayerId = Comm.get().gameLogic.uniqueUserId;
+        int opponentPlayerId = Comm.get().gameLogic.opponentUserId;
+
         if(Gdx.input.isTouched() && !wasTouchDown) {
             setTouchPos(firstTouch);
             // check cards
@@ -44,7 +47,9 @@ public class InputController {
             if(card != null) {
                 draggingEntity = card;
             } else if (minion != null) {
-                draggingEntity = minion;
+                if(minion.getComponent(MinionComponent.class).user_id == currPlayerId) {
+                    draggingEntity = minion;
+                }
             }
 
             wasTouchDown = true;
@@ -68,7 +73,7 @@ public class InputController {
                     // is this card or minion
                     if(draggingEntity.getComponent(CardComponent.class) != null) {
                         // it's card
-                        if(tc.y + tc.offsetY > -2.3f) {
+                        if(tc.y + tc.offsetY > -230f) {
                             playCard();
                         } else {
                             tc.offsetX = 0;
@@ -107,7 +112,7 @@ public class InputController {
         int slot = playCard.getCardComponent().slot;
         Comm.get().gameLogic.getEngine().removeEntity(draggingEntity);
         // also shift slots
-        Comm.get().gameLogic.getEngine().getSystem(CardSystem.class).shiftSlots(slot);
+        Comm.get().gameLogic.getEngine().getSystem(CardSystem.class).shiftSlots(playCard.getCardComponent().playerId, slot);
     }
 
     private void playMinion(Entity targetEntity) {

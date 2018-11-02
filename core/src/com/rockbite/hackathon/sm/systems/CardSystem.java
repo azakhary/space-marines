@@ -30,15 +30,15 @@ public class CardSystem extends EntitySystem {
 
             Viewport viewport = Comm.get().gameLogic.getEngine().getSystem(RenderSystem.class).viewport;
 
-            transform.x  = (card.slot * 1.1f) - viewport.getWorldWidth()/2f + 0.2f;
-            transform.y = 0  - viewport.getWorldHeight()/2f + 0.2f;
+            transform.x  = (card.slot * 110f) - viewport.getWorldWidth()/2f + 20f;
+            transform.y = 0  - viewport.getWorldHeight()/2f + 20f;
         }
     }
 
-    public void shiftSlots(int slot) {
+    public void shiftSlots(int playerId, int slot) {
         for (int i = 0; i < entities.size(); i++) {
             CardComponent card = mainComponentMapper.get(entities.get(i));
-            if(card.slot > slot) {
+            if(card.slot > slot && card.playerId == playerId) {
                 card.slot--;
             }
         }

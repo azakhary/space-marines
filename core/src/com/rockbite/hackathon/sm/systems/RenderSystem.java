@@ -7,8 +7,11 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.rockbite.hackathon.sm.communications.Comm;
@@ -36,7 +39,6 @@ public class RenderSystem extends EntitySystem {
     private ComponentMapper<CardComponent> ccMapper = ComponentMapper.getFor(CardComponent.class);
     private ComponentMapper<TransformComponent> tcMapper = ComponentMapper.getFor(TransformComponent.class);
 
-
     public void addedToEngine(Engine engine) {
         deckEntities = engine.getEntitiesFor(Family.all(DeckComponent.class).get());
         cardEntities = engine.getEntitiesFor(Family.all(CardComponent.class).get());
@@ -44,7 +46,7 @@ public class RenderSystem extends EntitySystem {
     }
 
     public RenderSystem() {
-        viewport = new FitViewport(6f, 10f);
+        viewport = new FitViewport(600f, 1000f);
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch = new PolygonSpriteBatch();
     }
@@ -75,7 +77,7 @@ public class RenderSystem extends EntitySystem {
             DeckComponent component = dcMapper.get(deckEntities.get(i));
             if(component.playerId == currPlayerId) {
                 // render current player deck
-                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-back"), viewport.getWorldWidth()/2f - 1f - 0.2f, -viewport.getWorldHeight()/2f + 0.2f, 1f, 1.31f);
+                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-back"), viewport.getWorldWidth()/2f - 100f - 20f, -viewport.getWorldHeight()/2f + 20f, 100f, 131f);
            }
         }
     }
@@ -97,13 +99,21 @@ public class RenderSystem extends EntitySystem {
 
     public void renderBoard(float deltaTime) {
 
-
         for (int i = 0; i < minionEntities.size(); ++i) {
             MinionComponent minion = mcMapper.get(minionEntities.get(i));
             TransformComponent transform = tcMapper.get(minionEntities.get(i));
             // render current player deck
-             batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(minion.id + "-board"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width, transform.height);
+            batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(minion.id + "-board"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width, transform.height);
 
+            Label label  = Comm.get().gameLogic.getAssets().label;
+            label.setText(minion.atk + "");
+            label.setPosition(transform.x + transform.offsetX + 10f, transform.y+transform.offsetY);
+            label.draw(batch, 1f);
+
+            label  = Comm.get().gameLogic.getAssets().label;
+            label.setText(minion.hp + "");
+            label.setPosition(transform.x + transform.offsetX + 98f, transform.y+transform.offsetY);
+            label.draw(batch, 1f);
         }
     }
 

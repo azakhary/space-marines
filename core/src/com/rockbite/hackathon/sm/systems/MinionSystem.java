@@ -8,6 +8,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.rockbite.hackathon.sm.communications.Comm;
+import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
 import com.rockbite.hackathon.sm.components.CardComponent;
 import com.rockbite.hackathon.sm.components.MinionComponent;
 import com.rockbite.hackathon.sm.components.render.TransformComponent;
@@ -39,46 +40,46 @@ public class MinionSystem extends EntitySystem {
             if(minion.user_id == currPlayerId) {
                 // current player
                 if(minion.slot == 0) {
-                    transform.x  =  - 2f - 0.6f;
-                    transform.y = 0  - viewport.getWorldHeight()/2f + 0.2f + 3.7f;
+                    transform.x  =  - 200f - 60f;
+                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 370f;
                 }
                 if(minion.slot == 1) {
-                    transform.x  = - 0.6f;
-                    transform.y = 0  - viewport.getWorldHeight()/2f + 0.2f + 3.7f;
+                    transform.x  = - 60f;
+                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 370f;
                 }
                 if(minion.slot == 2) {
-                    transform.x  = + 2f - 0.6f;
-                    transform.y = 0  - viewport.getWorldHeight()/2f + 0.2f + 3.7f;
+                    transform.x  = + 200f - 60f;
+                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 370f;
                 }
                 if(minion.slot == 3) {
-                    transform.x  = - 2f - 0.6f;
-                    transform.y = 0  - viewport.getWorldHeight()/2f + 0.2f + 2f;
+                    transform.x  = - 200f - 60f;
+                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 200f;
                 }
                 if(minion.slot == 4) {
-                    transform.x  = + 2f - 0.6f;
-                    transform.y = 0  - viewport.getWorldHeight()/2f + 0.2f + 2f;
+                    transform.x  = + 200f - 60f;
+                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 200f;
                 }
 
             } else {
                 if(minion.slot == 0) {
-                    transform.x  =  - 2f - 0.6f;
-                    transform.y = 0  + viewport.getWorldHeight()/2f + 0.2f - 3.7f;
+                    transform.x  =  - 200f - 60f;
+                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 370f;
                 }
                 if(minion.slot == 1) {
-                    transform.x  = - 0.6f;
-                    transform.y = 0  + viewport.getWorldHeight()/2f + 0.2f - 3.7f;
+                    transform.x  = - 60f;
+                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 370f;
                 }
                 if(minion.slot == 2) {
-                    transform.x  = + 2f - 0.6f;
+                    transform.x  = + 200f - 0.6f;
                     transform.y = 0  + viewport.getWorldHeight()/2f + 0.2f - 3.7f;
                 }
                 if(minion.slot == 3) {
-                    transform.x  = - 2f - 0.6f;
-                    transform.y = 0  + viewport.getWorldHeight()/2f + 0.2f - 2f;
+                    transform.x  = - 200f - 60f;
+                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 200f;
                 }
                 if(minion.slot == 4) {
-                    transform.x  = + 2f - 0.6f;
-                    transform.y = 0  + viewport.getWorldHeight()/2f + 0.2f - 2f;
+                    transform.x  = + 200f - 60f;
+                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 200f;
                 }
             }
 
@@ -86,4 +87,29 @@ public class MinionSystem extends EntitySystem {
         }
     }
 
+    public void updateMinionData(MinionUpdate minionUpdate) {
+        for (int i = 0; i < entities.size(); ++i) {
+            MinionComponent minion = mainComponentMapper.get(entities.get(i));
+
+            if(minion.user_id == minionUpdate.user_id && minion.slot == minionUpdate.slot_id) {
+                if(minionUpdate.destroyed != true) {
+                    minion.atk = minionUpdate.atk;
+                    minion.hp = minionUpdate.hp;
+                } else {
+                    getEngine().removeEntity(entities.get(i));
+                    shiftSlots(minionUpdate.user_id, minionUpdate.slot_id);
+                }
+            }
+        }
+    }
+
+
+    public void shiftSlots(int user_id, int slot) {
+        for (int i = 0; i < entities.size(); i++) {
+            MinionComponent minion = mainComponentMapper.get(entities.get(i));
+            if(minion.slot > slot && minion.user_id == user_id) {
+                minion.slot--;
+            }
+        }
+    }
 }

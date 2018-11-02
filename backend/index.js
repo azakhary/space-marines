@@ -145,12 +145,34 @@ function minionAttackCommand(socket, data) {
     connectionRooms[room_id].forEach(function (player) {
          if(player.socket.id == socket.id) {
             //player that played this minion
-
-          // do the attack!!!!
-
+            fromPlayer = player;
+         } else {
+            toPlayer = player;
          }
-
     });
+
+    toPlayer.board[target_slot].hp -= fromPlayer.board[from_slot].atk;
+    fromPlayer.board[from_slot].hp -= toPlayer.board[target_slot].atk;
+
+    if(toPlayer.board[target_slot].hp <= 0) {
+        toPlayer.board[target_slot].destroyed = true;
+    }
+    if(fromPlayer.board[from_slot].hp <= 0) {
+        fromPlayer.board[from_slot].destroyed = true;
+    }
+
+    toPlayer.socket.emit("minion_update", {user_id:toPlayer.id, slot_id: target_slot, minion: toPlayer.board[target_slot]});
+    toPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
+
+    fromPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
+    fromPlayer.socket.emit("minion_update", {user_id:toPlayer.id, slot_id: target_slot, minion: toPlayer.board[target_slot]});
+
+    if(toPlayer.board[target_slot].destroyed == true) {
+        toPlayer.board.splice(target_slot, target_slot + 1);
+    }
+    if(fromPlayer.board[from_slot].destroyed == true) {
+        fromPlayer.board.splice(from_slot, from_slot + 1);
+    }
 }
 
 function Player() {
@@ -170,6 +192,7 @@ function summonMinion(room, player, card) {
 
      minion.atk = card.minion.atk;
      minion.hp = card.minion.hp;
+     minion.destroyed = false;
 
      minion.id = card.id;
 
