@@ -1,35 +1,41 @@
 buildscript {
     repositories {
         mavenLocal()
+        jcenter()
         mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url  "https://adcolony.bintray.com/AdColony" }
+        maven { url  "https://maven.google.com" }
+        maven { url  "https://dl.google.com/dl/android/maven2/" }
     }
     dependencies {
-
+        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.badlogicgames.gdx:gdx-tools:1.9.8'
     }
 }
 
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.tools.texturepacker.TexturePacker
-import org.apache.commons.io.FileUtils
 
 task packTextures(dependsOn: "build") {
     println("packing textures")
 
-    String src = project.file("android/assets_source/").absolutePath
-    String dst = project.file("android/assets/").absolutePath
+    //boolean isModified = false;
 
-    File main = new File(src)
-    main.eachFile() { img ->
-        String imgType
+    String srcPath = project.file("android/assets_source/").absolutePath
+    String dstPath = project.file("android/assets/").absolutePath
+
+    /*File source = new File(srcPath)
+    File destination = new File(dstPath)
+
+    source.eachFile() { img ->
         def imgName = img.getName();
-        println(imgName)
-    }
-
-    if(dst.lastModified()<src.lastModified()){
-        println(src.getPath() +" file changed copying it")
-        GFileUtils.deleteQuietly(dst)
-        FileUtils.copyFile(src, dst, true);
-    }
+        //println(imgName)
+        if(destination.lastModified()<img.lastModified()){
+            println("Source directory is modified need repack")
+            isModified = true;
+        }
+    }*/
 
     TexturePacker.Settings settings =   new TexturePacker.Settings();
 
@@ -38,5 +44,5 @@ task packTextures(dependsOn: "build") {
     settings.filterMin = Texture.TextureFilter.Linear;
     settings.filterMag = Texture.TextureFilter.Linear;
 
-    TexturePacker.processIfModified(settings,src, dst, "pack")
+    TexturePacker.processIfModified(settings, srcPath, dstPath, "pack")
 }
