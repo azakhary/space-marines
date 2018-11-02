@@ -1,4 +1,4 @@
-package com.rockbite.hackathon.sm;
+package com.rockbite.hackathon.sm.systems;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
