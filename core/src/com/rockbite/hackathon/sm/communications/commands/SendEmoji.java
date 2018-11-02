@@ -24,7 +24,7 @@ public class SendEmoji extends Command {
         JSONObject payload = new JSONObject();
         try {
             payload.put("emoji_code", emojiCode);
-            Comm.get().gameLogic.getSocket().emit("send_emoji", payload);
+            Comm.get().gameLogic.getNetwork().getSocket().emit("send_emoji", payload);
         } catch (JSONException e) {
             e.printStackTrace();
         }

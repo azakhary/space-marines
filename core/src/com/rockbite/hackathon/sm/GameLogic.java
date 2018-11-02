@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.rockbite.hackathon.sm.communications.Action;
 import com.rockbite.hackathon.sm.communications.Comm;
+import com.rockbite.hackathon.sm.communications.Network;
 import com.rockbite.hackathon.sm.communications.Observer;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
 import com.rockbite.hackathon.sm.communications.commands.SendEmoji;
@@ -21,15 +22,6 @@ import com.rockbite.hackathon.sm.systems.HeroSystem;
 import com.rockbite.hackathon.sm.systems.MinionSystem;
 import com.rockbite.hackathon.sm.systems.SpellSystem;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.URISyntaxException;
-
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-
 public class GameLogic implements Observer  {
 
     private PooledEngine engine;
@@ -39,14 +31,13 @@ public class GameLogic implements Observer  {
 
     private Array<Array<Entity>> cards;
 
-    private int uniqueUserId;
-
-    private int opponentUserId;
+    public int uniqueUserId;
+    public int opponentUserId;
 
     public static final int BOTTOM_PLAYER = 0;
     public static final int TOP_PLAYER = 1;
 
-    private Socket socket;
+    private Network network;
 
     public GameLogic(PooledEngine engine) {
         this.engine = engine;
@@ -73,66 +64,7 @@ public class GameLogic implements Observer  {
         uniqueUserId = MathUtils.random(1, 100000);
 
         // connect to server and ask for room
-        try {
-            socket = IO.socket("http://10.10.29.151:5555");
-
-            socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {
-                    System.out.println("connected to socket. waiting for opponent.");
-
-                    JSONObject payload = new JSONObject();
-                    try {
-                        payload.put("user_id", uniqueUserId);
-                        socket.emit("join", payload);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }).on("game_started", new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {
-                    JSONObject obj = (JSONObject)args[0];
-                    try {
-                        int user_id = obj.getInt("user_id");
-                        System.out.println("room created with opponent id: " + user_id);
-                        opponentUserId = user_id;
-                        initGameEntities();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }).on("show_emoji", new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {
-                    JSONObject obj = (JSONObject)args[0];
-                    short emojiCode = 0;
-                    try {
-                        emojiCode = (short) obj.getInt("emoji_code");
-                        EmojiShown action = Comm.get().getAction(EmojiShown.class);
-                        action.set(emojiCode);
-                        Comm.get().sendAction(action);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {}
-
-            });
-            socket.connect();
-
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        network = new Network();
     }
 
     public void initGameEntities() {
@@ -185,7 +117,8 @@ public class GameLogic implements Observer  {
         engine.removeSystem(engine.getSystem(HeroSystem.class));
         engine.removeSystem(engine.getSystem(EmojiSystem.class));
 
-        socket.disconnect();
+        network.dispose();
+        System.out.println("socket disconnect");
     }
 
     @Override
@@ -205,7 +138,7 @@ public class GameLogic implements Observer  {
         }
     }
 
-    public Socket getSocket() {
-        return socket;
+    public Network getNetwork() {
+        return network;
     }
 }
