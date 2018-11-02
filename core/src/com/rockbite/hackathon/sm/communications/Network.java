@@ -1,6 +1,8 @@
 package com.rockbite.hackathon.sm.communications;
 
+import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
+import com.rockbite.hackathon.sm.components.CardComponent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,6 +52,55 @@ public class Network {
                     }
                 }
 
+            }).on("init_deck", new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {
+                    JSONObject obj = (JSONObject)args[0];
+                    try {
+                        int user_id = obj.getInt("user_id");
+                        int deck_size = obj.getInt("deck_size");
+                        System.out.println("deck info received: " + deck_size + " cards");
+                        Comm.get().gameLogic.createDeck(user_id, deck_size);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }).on("summon_minion", new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {
+                    JSONObject obj = (JSONObject)args[0];
+                    try {
+                        int user_id = obj.getInt("user_id");
+                        JSONObject minionJson = obj.getJSONObject("minion");
+                        Comm.get().gameLogic.summonMinion(user_id, minionJson);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }).on("draw_card", new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {
+                    JSONObject obj = (JSONObject)args[0];
+                    try {
+                        int user_id = obj.getInt("user_id");
+                        JSONObject cardJson = obj.getJSONObject("card");
+
+                        CardDrawn action = Comm.get().getAction(CardDrawn.class);
+                        CardComponent component = Comm.get().gameLogic.getEngine().createComponent(CardComponent.class);
+                        component.load(user_id, cardJson);
+                        action.setCard(component);
+                        Comm.get().sendAction(action);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
             }).on("show_emoji", new Emitter.Listener() {
 
                 @Override

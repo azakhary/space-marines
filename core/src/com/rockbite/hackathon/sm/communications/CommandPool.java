@@ -3,6 +3,8 @@ package com.rockbite.hackathon.sm.communications;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
+import com.rockbite.hackathon.sm.communications.commands.MinionAttack;
+import com.rockbite.hackathon.sm.communications.commands.PlayCard;
 import com.rockbite.hackathon.sm.communications.commands.SendEmoji;
 
 import java.util.HashMap;
@@ -18,6 +20,8 @@ public class CommandPool {
          * REGISTERING ALL COMMANDS HERE
          */
         register(SendEmoji.class);
+        register(PlayCard.class);
+        register(MinionAttack.class);
 
     }
 

@@ -15,17 +15,22 @@ public class SpaceMarines extends ApplicationAdapter {
 
 	GameLogic gameLogic;
 
+	InputController inputController;
+
 	@Override
 	public void create () {
 
 		engine = new PooledEngine();
 
+        inputController = new InputController();
 
 		gameLogic = new GameLogic(engine);
+		Assets assets = new Assets();
 
 		RenderSystem renderSystem = new RenderSystem();
 		engine.addSystem(renderSystem);
 		Comm.injectGameLogic(gameLogic);
+		gameLogic.injectAssets(assets);
 
 		gameLogic.initGameSession(); // TODO: this has to be done at other point when integrated with backend API
 	}
@@ -35,11 +40,7 @@ public class SpaceMarines extends ApplicationAdapter {
 		Comm.get().update();
 		engine.update(Gdx.graphics.getDeltaTime());
 
-		//TODO: remove
-		if(Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-			System.out.println("BOBR");
-			Comm.get().executeCommand(SendEmoji.make((short)1));
-		}
+        inputController.update(Gdx.graphics.getDeltaTime());
 	}
 	
 	@Override

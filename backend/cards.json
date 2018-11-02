@@ -1,0 +1,15 @@
+[
+  {
+    "id": "argturus",
+    "type": "minion",
+    "title": "Argturus",
+    "cost": 1,
+    "minion": {
+      "atk": 5,
+      "hp": 7
+    },
+    "spell": {
+
+    }
+  }
+]

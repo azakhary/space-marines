@@ -3,6 +3,7 @@ package com.rockbite.hackathon.sm.communications;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
+import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
 
 import java.util.HashMap;
@@ -18,6 +19,7 @@ public class ActionPool {
          * REGISTERING ALL COMMANDS HERE
          */
         register(EmojiShown.class);
+        register(CardDrawn.class);
     }
 
     private <T extends Action> void register(final Class<T> clazz) {

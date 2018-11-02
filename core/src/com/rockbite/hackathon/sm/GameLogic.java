@@ -9,12 +9,16 @@ import com.rockbite.hackathon.sm.communications.Action;
 import com.rockbite.hackathon.sm.communications.Comm;
 import com.rockbite.hackathon.sm.communications.Network;
 import com.rockbite.hackathon.sm.communications.Observer;
+import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
 import com.rockbite.hackathon.sm.communications.commands.SendEmoji;
 import com.rockbite.hackathon.sm.components.CardComponent;
+import com.rockbite.hackathon.sm.components.DeckComponent;
 import com.rockbite.hackathon.sm.components.EmojiComponent;
 import com.rockbite.hackathon.sm.components.GameComponent;
 import com.rockbite.hackathon.sm.components.HeroComponent;
+import com.rockbite.hackathon.sm.components.MinionComponent;
+import com.rockbite.hackathon.sm.components.render.TransformComponent;
 import com.rockbite.hackathon.sm.systems.CardSystem;
 import com.rockbite.hackathon.sm.systems.EmojiSystem;
 import com.rockbite.hackathon.sm.systems.GameSystem;
@@ -22,8 +26,9 @@ import com.rockbite.hackathon.sm.systems.HeroSystem;
 import com.rockbite.hackathon.sm.systems.MinionSystem;
 import com.rockbite.hackathon.sm.systems.SpellSystem;
 
-public class GameLogic implements Observer  {
+import org.json.JSONObject;
 
+public class GameLogic implements Observer  {
     private PooledEngine engine;
 
     private Entity gameEntity;
@@ -38,6 +43,8 @@ public class GameLogic implements Observer  {
     public static final int TOP_PLAYER = 1;
 
     private Network network;
+
+    private Assets assets;
 
     public GameLogic(PooledEngine engine) {
         this.engine = engine;
@@ -65,6 +72,7 @@ public class GameLogic implements Observer  {
 
         // connect to server and ask for room
         network = new Network();
+        //initGameEntities();
     }
 
     public void initGameEntities() {
@@ -92,21 +100,8 @@ public class GameLogic implements Observer  {
         cards.add(new Array<Entity>());
         cards.add(new Array<Entity>());
 
-        // bottom player cards
-        for(int i = 0; i < 30; i++) {
-            Entity entity = engine.createEntity();
-            entity.add(new CardComponent(BOTTOM_PLAYER)); //TODO: change to actual ID
-            cards.get(BOTTOM_PLAYER).add(entity);
-            engine.addEntity(entity);
-        }
 
-        // top player cards
-        for(int i = 0; i < 30; i++) {
-            Entity entity = engine.createEntity();
-            entity.add(new CardComponent(TOP_PLAYER)); //TODO: change to actual ID
-            cards.get(TOP_PLAYER).add(entity);
-            engine.addEntity(entity);
-        }
+        createDeck(1, 30);
     }
 
     public void dispose() {
@@ -124,6 +119,7 @@ public class GameLogic implements Observer  {
     @Override
     public void registerActionChannels() {
         Comm.get().registerObserver(this, EmojiShown.class);
+        Comm.get().registerObserver(this, CardDrawn.class);
     }
 
     @Override
@@ -136,9 +132,57 @@ public class GameLogic implements Observer  {
             engine.addEntity(emojiEntity);
             System.out.println("emoji code: " + emojiShown.getEmojiCode() + ""); // TODO: remove this
         }
+
+        if(action instanceof CardDrawn) {
+            CardDrawn cardDrawn = (CardDrawn) action;
+
+            Entity cardEntity = engine.createEntity();
+            cardEntity.add(cardDrawn.getComponent());
+            TransformComponent transformComponent = engine.createComponent(TransformComponent.class);
+            transformComponent.width = 1f;
+            transformComponent.height = 1.31f;
+            cardEntity.add(transformComponent);
+            engine.addEntity(cardEntity);
+
+            System.out.println("draw card " + cardDrawn.getComponent().title);
+            cardDrawn.setDoneDisplaying(true);
+        }
     }
 
     public Network getNetwork() {
         return network;
+    }
+
+    public void createDeck(int user_id, int deck_size) {
+        Entity deck = engine.createEntity();
+        deck.add(new DeckComponent(user_id, deck_size));
+        engine.addEntity(deck);
+
+    }
+
+    public void injectAssets(Assets assets) {
+        this.assets = assets;
+    }
+
+
+    public Assets getAssets() {
+        return assets;
+    }
+
+    public PooledEngine getEngine() {
+        return engine;
+    }
+
+    public void summonMinion(int user_id, JSONObject minionJson) {
+        Entity minion = engine.createEntity();
+        MinionComponent minionComponent = engine.createComponent(MinionComponent.class);
+        TransformComponent transformComponent = engine.createComponent(TransformComponent.class);
+        transformComponent.reset();
+        transformComponent.width = 1.2f;
+        transformComponent.height = 1.2f * 1.31f;
+        minionComponent.set(user_id, minionJson);
+        minion.add(minionComponent);
+        minion.add(transformComponent);
+        engine.addEntity(minion);
     }
 }
