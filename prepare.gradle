@@ -1,0 +1,42 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+
+    }
+}
+
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.tools.texturepacker.TexturePacker
+import org.apache.commons.io.FileUtils
+
+task packTextures(dependsOn: "build") {
+    println("packing textures")
+
+    String src = project.file("android/assets_source/").absolutePath
+    String dst = project.file("android/assets/").absolutePath
+
+    File main = new File(src)
+    main.eachFile() { img ->
+        String imgType
+        def imgName = img.getName();
+        println(imgName)
+    }
+
+    if(dst.lastModified()<src.lastModified()){
+        println(src.getPath() +" file changed copying it")
+        GFileUtils.deleteQuietly(dst)
+        FileUtils.copyFile(src, dst, true);
+    }
+
+    TexturePacker.Settings settings =   new TexturePacker.Settings();
+
+    settings.maxWidth       =   2048;
+    settings.maxHeight      =   2048;
+    settings.filterMin = Texture.TextureFilter.Linear;
+    settings.filterMag = Texture.TextureFilter.Linear;
+
+    TexturePacker.processIfModified(settings,src, dst, "pack")
+}
