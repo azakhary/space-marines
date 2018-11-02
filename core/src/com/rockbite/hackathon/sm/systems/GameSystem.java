@@ -25,7 +25,7 @@ public class GameSystem extends EntitySystem {
     public void update(float deltaTime) {
         for (int i = 0; i < entities.size(); ++i) {
 
-            GameComponent gameComponent = mainComponentMapper.get(entities.get(i));
+            //GameComponent gameComponent = mainComponentMapper.get(entities.get(i));
 
         }
     }

@@ -1,6 +1,7 @@
 package com.rockbite.hackathon.sm;
 
 import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.rockbite.hackathon.sm.communications.Comm;
@@ -8,14 +9,14 @@ import com.rockbite.hackathon.sm.communications.Command;
 import com.rockbite.hackathon.sm.systems.RenderSystem;
 
 public class SpaceMarines extends ApplicationAdapter {
-	Engine engine;
+	PooledEngine engine;
 
 	GameLogic gameLogic;
 
 	@Override
 	public void create () {
 
-		engine = new Engine();
+		engine = new PooledEngine();
 
 
 		gameLogic = new GameLogic(engine);

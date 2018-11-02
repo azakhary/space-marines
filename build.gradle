@@ -58,7 +58,9 @@ project(":android") {
     configurations { natives }
 
     dependencies {
-        compile project(":core")
+        compile project(":core"),{
+            exclude group: "org.json", module: "json"
+        }
         compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
@@ -92,8 +94,14 @@ project(":core") {
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
-        
+
+        compile "io.socket:socket.io-client:1.0.0"
     }
+}
+
+task wrapper(type: Wrapper) {
+    //gradleVersion = '2.14.1'
+    gradleVersion = '4.6'
 }
 
 tasks.eclipse.doLast {
