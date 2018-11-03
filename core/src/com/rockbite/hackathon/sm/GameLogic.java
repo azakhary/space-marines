@@ -12,6 +12,7 @@ import com.rockbite.hackathon.sm.communications.Network;
 import com.rockbite.hackathon.sm.communications.Observer;
 import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
+import com.rockbite.hackathon.sm.communications.actions.HeroSync;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
 import com.rockbite.hackathon.sm.communications.commands.SendEmoji;
 import com.rockbite.hackathon.sm.components.CardComponent;
@@ -109,8 +110,17 @@ public class GameLogic implements Observer  {
         players = new Entity[2];
         players[BOTTOM_PLAYER] = engine.createEntity();
         players[TOP_PLAYER] = engine.createEntity();
-        players[BOTTOM_PLAYER].add(new HeroComponent());
-        players[TOP_PLAYER].add(new HeroComponent());
+
+        players[BOTTOM_PLAYER].add(new HeroComponent(Comm.get().gameLogic.uniqueUserId, "one", 30));
+        players[TOP_PLAYER].add(new HeroComponent(Comm.get().gameLogic.opponentUserId, "two", 30));
+
+        TransformComponent tcB = engine.createComponent(TransformComponent.class);
+        tcB.set(-55, -290, 115, 115*0.88f);
+        players[BOTTOM_PLAYER].add(tcB);
+
+        TransformComponent tcP = engine.createComponent(TransformComponent.class);
+        tcP.set(-55, +300, 115, 115*0.88f);
+        players[TOP_PLAYER].add(tcP);
 
         engine.addEntity(players[BOTTOM_PLAYER]);
         engine.addEntity(players[TOP_PLAYER]);
@@ -144,6 +154,7 @@ public class GameLogic implements Observer  {
         Comm.get().registerObserver(this, EmojiShown.class);
         Comm.get().registerObserver(this, CardDrawn.class);
         Comm.get().registerObserver(this, MinionUpdate.class);
+        Comm.get().registerObserver(this, HeroSync.class);
     }
 
     @Override
@@ -178,6 +189,14 @@ public class GameLogic implements Observer  {
             engine.getSystem(MinionSystem.class).updateMinionData(minionUpdate);
 
             minionUpdate.setDoneDisplaying(true);
+        }
+
+        if(action instanceof HeroSync) {
+            HeroSync heroSync = (HeroSync) action;
+
+            engine.getSystem(HeroSystem.class).heroSync(heroSync);
+
+            heroSync.setDoneDisplaying(true);
         }
     }
 

@@ -12,6 +12,8 @@ var roomIdInc = 0;
 var connectionRooms = {};
 var currentConnections = {};
 
+const MANA_SPEED = 0.1;
+
 /*
 MongoClient.connect("mongodb://localhost:27017/space-marines", function (err, db) {
     if (!err) {
@@ -80,8 +82,8 @@ function join(socket, data) {
         roomIdInc++;
         socket.join(room_id);
         player.socket.join(room_id);
-        socket.emit("game_started", {user_id:player.id, room_id:room_id});
-        player.socket.emit("game_started", {user_id:client_id, room_id:room_id});
+        socket.emit("game_started", {user_id:player.id, room_id:room_id, mana_speed:MANA_SPEED});
+        player.socket.emit("game_started", {user_id:client_id, room_id:room_id, mana_speed:MANA_SPEED});
         console.log(room_id);
 
         currentConnections[socket.id]['room_id'] = room_id;
@@ -120,13 +122,18 @@ function playCard(socket, data) {
            var card = player.hand[slotId];
            player.hand.splice(slotId, slotId+1);
 
-           if(card.type == "minion") {
-               summonMinion( connectionRooms[room_id], player, card)
-               //console.log("summoning the minion hohoho");
-           }
 
-           if(player.deckLock == false) {
-                tryToDraw(player)
+           var spent = spendMana(room_id, player, card);
+
+           if(spent) {
+               if (card.type == "minion") {
+                   summonMinion(connectionRooms[room_id], player, card)
+                   //console.log("summoning the minion hohoho");
+               }
+
+               if (player.deckLock == false) {
+                   tryToDraw(player)
+               }
            }
        }
 
@@ -206,6 +213,38 @@ function summonMinion(room, player, card) {
      room[1].socket.emit("summon_minion", {user_id:player.id, 'minion': minion});
 }
 
+function spendMana(room, player, card) {
+    var curr = new Date().getTime();
+    var time = player.lastSpentTime ? player.lastSpentTime : curr;
+
+    var passedTimeSec = ( curr - time ) / 1000;
+
+    var mana = player.mana;
+
+    mana += ( passedTimeSec * MANA_SPEED );
+
+    if(mana > player.maxMana) {
+        mana = player.maxMana;
+    }
+    else {
+        mana = Math.floor(mana);
+    }
+
+    if(mana > card.cost) {
+        mana -= card.cost;
+
+        player.mana = mana;
+        player.lastSpentTime = curr;
+
+        syncHero(player);
+
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 function createCard(id) {
     var card = new Card();
     var obj = cardMap[id];
@@ -230,6 +269,8 @@ function initPlayer(socket, id) {
 
     player.mana = 0;
     player.maxMana = 10;
+
+    player.lastSpentTime = new Date().getTime();
 
     player.deckLock = true;
     setTimeout(function() {
@@ -274,4 +315,8 @@ function drawCard(player) {
     player.hand.push(crd);
     crd.slot = player.hand.indexOf(crd);
     player.socket.emit("draw_card", {user_id:player.id, card: crd});
+}
+
+function syncHero(player) {
+    player.socket.emit("hero_sync", {user_id:player.id, 'mana': player.mana, 'hp': 20, 'max_hp': 30});
 }

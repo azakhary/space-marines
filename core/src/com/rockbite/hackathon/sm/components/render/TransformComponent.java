@@ -15,4 +15,11 @@ public class TransformComponent implements Component{
         offsetX = 0;
         offsetY = 0;
     }
+
+    public void set(float x, float y, float width, float height) {
+        this.x = x;
+        this.y = y;
+        this.width =width;
+        this.height=height;
+    }
 }

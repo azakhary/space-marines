@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
+import com.rockbite.hackathon.sm.communications.actions.HeroSync;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
 
 import java.util.HashMap;
@@ -22,6 +23,7 @@ public class ActionPool {
         register(EmojiShown.class);
         register(CardDrawn.class);
         register(MinionUpdate.class);
+        register(HeroSync.class);
     }
 
     private <T extends Action> void register(final Class<T> clazz) {

@@ -20,6 +20,7 @@ import com.rockbite.hackathon.sm.components.CardComponent;
 import com.rockbite.hackathon.sm.components.DeckComponent;
 import com.rockbite.hackathon.sm.components.EmojiComponent;
 import com.rockbite.hackathon.sm.components.GameComponent;
+import com.rockbite.hackathon.sm.components.HeroComponent;
 import com.rockbite.hackathon.sm.components.MinionComponent;
 import com.rockbite.hackathon.sm.components.render.DrawableComponent;
 import com.rockbite.hackathon.sm.components.render.TransformComponent;
@@ -38,6 +39,8 @@ public class RenderSystem extends EntitySystem {
     private ImmutableArray<Entity> cardEntities;
     private ImmutableArray<Entity> minionEntities;
 
+    private ImmutableArray<Entity> heroEntities;
+
     private ImmutableArray<Entity> drawables;
     private Array<Entity> sortedDrawables = new Array<Entity>();
 
@@ -48,12 +51,14 @@ public class RenderSystem extends EntitySystem {
     private ComponentMapper<CardComponent> ccMapper = ComponentMapper.getFor(CardComponent.class);
     private ComponentMapper<TransformComponent> tcMapper = ComponentMapper.getFor(TransformComponent.class);
     private ComponentMapper<DrawableComponent> drawableMapper = ComponentMapper.getFor(DrawableComponent.class);
+    private ComponentMapper<HeroComponent> heroMapper = ComponentMapper.getFor(HeroComponent.class);
 
     public void addedToEngine(Engine engine) {
         deckEntities = engine.getEntitiesFor(Family.all(DeckComponent.class).get());
         cardEntities = engine.getEntitiesFor(Family.all(CardComponent.class).get());
         minionEntities = engine.getEntitiesFor(Family.all(MinionComponent.class).get());
         drawables = engine.getEntitiesFor(Family.all(DrawableComponent.class).get());
+        heroEntities = engine.getEntitiesFor(Family.all(HeroComponent.class).get());
 
 
 
@@ -97,6 +102,8 @@ public class RenderSystem extends EntitySystem {
 
         renderBoard(deltaTime);
 
+        renderHeroes(deltaTime);
+
 
         // render some additional labels
         if(Comm.get().gameLogic.gameEntity != null) {
@@ -119,6 +126,22 @@ public class RenderSystem extends EntitySystem {
         }
 
         batch.end();
+    }
+
+    private void renderHeroes(float deltaTime) {
+        for (int i = 0; i < heroEntities.size(); ++i) {
+            HeroComponent hero = heroMapper.get(heroEntities.get(i));
+            TransformComponent transform = tcMapper.get(heroEntities.get(i));
+
+            batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("hero-"+hero.nm), transform.x, transform.y, transform.width, transform.height);
+
+
+            Label label = Comm.get().gameLogic.getAssets().label;
+            label.setText(hero.hp+"/"+hero.maxHP);
+            label.setPosition(transform.x+18, transform.y-15);
+            label.draw(batch, 1f);
+
+        }
     }
 
     private void renderDrawables(float deltaTime) {

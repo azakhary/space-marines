@@ -2,6 +2,7 @@ package com.rockbite.hackathon.sm.communications;
 
 import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
+import com.rockbite.hackathon.sm.communications.actions.HeroSync;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
 import com.rockbite.hackathon.sm.components.CardComponent;
 
@@ -101,6 +102,21 @@ public class Network {
                     }
 
                 }
+            }).on("hero_sync", new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {
+                    JSONObject obj = (JSONObject)args[0];
+                    try {
+                        int user_id = obj.getInt("user_id");
+                        HeroSync action = Comm.get().getAction(HeroSync.class);
+                        action.set(user_id, obj);
+                        Comm.get().sendAction(action);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
             }).on("draw_card", new Emitter.Listener() {
 
                 @Override
@@ -119,7 +135,6 @@ public class Network {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
                 }
             }).on("show_emoji", new Emitter.Listener() {
 
