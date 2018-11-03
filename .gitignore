@@ -124,6 +124,6 @@ Thumbs.db
 !/ios-moe/xcode/*.xcodeproj/project.pbxproj
 /ios-moe/xcode/native/
 
-/android/assets
+
 backend/package-lock.json
 backend/node_modules

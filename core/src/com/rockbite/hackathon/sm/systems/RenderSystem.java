@@ -192,20 +192,22 @@ public class RenderSystem extends EntitySystem {
             if(card.playerId == currPlayerId) {
                 // render current player deck
                 float off = 10f;
-                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(card.id + "-card"), transform.x + transform.offsetX+off, transform.y+transform.offsetY+off, transform.width-off-10, transform.height-off-10);
-                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-hand"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width, transform.height);
+                batch.setColor(transform.tint);
+                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(card.id + "-card"), transform.x + transform.offsetX+off, transform.y+transform.offsetY+off,(transform.width-off-10)/2f, (transform.height-off-10)/2f, transform.width-off-10, transform.height-off-10, transform.scaleX, transform.scaleY, 0f);
+                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-hand"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width/2f, transform.height/2f, transform.width, transform.height, transform.scaleX, transform.scaleY, 0f);
+                batch.setColor(Color.WHITE);
 
                 // render title
                 Label label = Comm.get().gameLogic.getAssets().label_small;
                 label.setText(card.title);
                 label.setPosition(transform.x + transform.offsetX + transform.width/2f - label.getWidth()/2f - 22f, transform.y+105 + transform.offsetY);
-                label.draw(batch, 1f);
+                label.draw(batch, transform.tint.a);
 
                 // render cost
                 label = Comm.get().gameLogic.getAssets().label;
                 label.setText(card.cost+"");
                 label.setPosition(transform.x+45 + transform.offsetX, transform.y+2 + transform.offsetY);
-                label.draw(batch, 1f);
+                label.draw(batch, transform.tint.a);
             }
         }
     }

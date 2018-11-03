@@ -209,7 +209,7 @@ public class GameLogic implements Observer  {
         }
 
         if(action instanceof CardDrawn) {
-            CardDrawn cardDrawn = (CardDrawn) action;
+            final CardDrawn cardDrawn = (CardDrawn) action;
 
             Entity cardEntity = engine.createEntity();
             cardEntity.add(cardDrawn.getComponent());
@@ -220,7 +220,28 @@ public class GameLogic implements Observer  {
             engine.addEntity(cardEntity);
 
             System.out.println("draw card " + cardDrawn.getComponent().title);
-            cardDrawn.setDoneDisplaying(true);
+
+            transformComponent.initActorIfNotInited();
+            transformComponent.actor.addAction(
+                    Actions.sequence(
+                            Actions.parallel(Actions.fadeIn(0.3f), Actions.scaleTo(1.2f, 1.2f, 0.3f, Interpolation.circleOut)),
+                            Actions.run(new Runnable() {
+                                @Override
+                                public void run() {
+                                    int rnd = MathUtils.random(1, 3);
+                                    Comm.get().gameLogic.assets.sounds.get("add_card_to_hand_"+rnd).play(0.3f);
+                                }
+                            }),
+                            Actions.scaleTo(1, 1, 0.15f),
+                            Actions.delay(0.2f),
+                            Actions.run(new Runnable() {
+                                @Override
+                                public void run() {
+                                    cardDrawn.setDoneDisplaying(true);
+                                }
+                            })
+                    )
+            );
         }
 
         if(action instanceof MinionUpdate) {
@@ -285,6 +306,12 @@ public class GameLogic implements Observer  {
                     Actions.scaleTo(1.3f, 1.3f, 0.1f),
                     Actions.delay(0.10f),
                     Actions.parallel(Actions.moveTo(to.x, to.y, 0.15f), Actions.scaleTo(1, 1, 0.15f)),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            Comm.get().gameLogic.assets.sounds.get("punch").play(0.3f);
+                        }
+                    }),
                     Actions.moveTo(from.x, from.y, 0.25f, Interpolation.circleOut),
                     Actions.delay(0.50f),
                     Actions.run(new Runnable() {
@@ -338,6 +365,12 @@ public class GameLogic implements Observer  {
         minion.getComponent(TransformComponent.class).initActorIfNotInited();
         minion.getComponent(TransformComponent.class).addAction(
                 Actions.sequence(
+                        Actions.run(new Runnable() {
+                            @Override
+                            public void run() {
+                                Comm.get().gameLogic.assets.sounds.get("minion_summon").play(0.3f);
+                            }
+                        }),
                         Actions.parallel(Actions.fadeIn(0.3f), Actions.scaleTo(1.1f, 1.1f, 0.3f, Interpolation.circleOut)),
                         Actions.scaleTo(1, 1, 0.1f),
                         Actions.delay(0.2f),

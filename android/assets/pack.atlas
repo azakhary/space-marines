@@ -1,0 +1,220 @@
+
+pack.png
+size: 2048,2048
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+ach-card
+  rotate: false
+  xy: 484, 510
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+avik-card
+  rotate: false
+  xy: 713, 814
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+boris-card
+  rotate: false
+  xy: 1224, 1728
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+bottom
+  rotate: false
+  xy: 2, 43
+  size: 480, 284
+  orig: 480, 284
+  offset: 0, 0
+  index: -1
+card-back
+  rotate: false
+  xy: 1526, 1872
+  size: 128, 165
+  orig: 128, 165
+  offset: 0, 0
+  index: -1
+card-board
+  rotate: false
+  xy: 966, 1720
+  size: 256, 317
+  orig: 256, 317
+  offset: 0, 0
+  index: -1
+card-hand
+  rotate: false
+  xy: 966, 1379
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+chat
+  rotate: false
+  xy: 966, 1549
+  size: 172, 169
+  orig: 172, 169
+  offset: 0, 0
+  index: -1
+dave-card
+  rotate: false
+  xy: 484, 340
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+deck
+  rotate: false
+  xy: 484, 680
+  size: 227, 302
+  orig: 227, 302
+  offset: 0, 0
+  index: -1
+eduard-card
+  rotate: false
+  xy: 1354, 1728
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+full-bg
+  rotate: false
+  xy: 2, 1184
+  size: 480, 853
+  orig: 480, 853
+  offset: 0, 0
+  index: -1
+gayane-card
+  rotate: false
+  xy: 966, 1209
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+gayush-card
+  rotate: false
+  xy: 484, 170
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+gev-card
+  rotate: false
+  xy: 966, 1039
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+grachik-card
+  rotate: false
+  xy: 843, 814
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+hayk-card
+  rotate: false
+  xy: 1656, 1869
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+hero-one
+  rotate: false
+  xy: 484, 80
+  size: 100, 88
+  orig: 100, 88
+  offset: 0, 0
+  index: -1
+hero-two
+  rotate: false
+  xy: 614, 250
+  size: 100, 88
+  orig: 100, 88
+  offset: 0, 0
+  index: -1
+lian-card
+  rotate: false
+  xy: 1786, 1869
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+loose
+  rotate: false
+  xy: 2, 329
+  size: 480, 853
+  orig: 480, 853
+  offset: 0, 0
+  index: -1
+masha-card
+  rotate: false
+  xy: 1916, 1869
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+nane-card
+  rotate: false
+  xy: 614, 510
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+patil-card
+  rotate: false
+  xy: 614, 340
+  size: 128, 168
+  orig: 128, 168
+  offset: 0, 0
+  index: -1
+progress_bg
+  rotate: false
+  xy: 713, 737
+  size: 171, 75
+  split: 83, 16, 38, 36
+  pad: 0, 0, 0, 0
+  orig: 171, 75
+  offset: 0, 0
+  index: -1
+progress_body
+  rotate: false
+  xy: 2, 2
+  size: 25, 39
+  split: 3, 5, 13, 13
+  pad: 0, 0, 0, 0
+  orig: 25, 39
+  offset: 0, 0
+  index: -1
+solid-white
+  rotate: false
+  xy: 1140, 1698
+  size: 20, 20
+  orig: 20, 20
+  offset: 0, 0
+  index: -1
+text-bg
+  rotate: false
+  xy: 1224, 1898
+  size: 300, 139
+  orig: 300, 139
+  offset: 0, 0
+  index: -1
+top
+  rotate: false
+  xy: 484, 984
+  size: 480, 198
+  orig: 480, 198
+  offset: 0, 0
+  index: -1
+win
+  rotate: false
+  xy: 484, 1184
+  size: 480, 853
+  orig: 480, 853
+  offset: 0, 0
+  index: -1
