@@ -324,7 +324,12 @@ function initPlayer(socket, id) {
     player.hand = [];
 
     //player character
-    
+    if(Math.random() < 0.5) {
+        player.hero = "one";
+    } else {
+        player.hero = "two";
+    }
+
 
     player.hp = 30;
     player.max_hp = 30;
