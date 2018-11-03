@@ -35,6 +35,13 @@ for(var i = 0; i < cards.length; i++) {
     cardMap[cards[i].id+''] = cards[i];
 }
 
+cardMap["ach"].battlecry = function(room, player, card) {
+    // custom battlecry for ach
+    console.log("ach battlecry");
+    summonMinion(room, player, cardMap["nane"]);
+    summonMinion(room, player, cardMap["dave"]);
+}
+
 //var card = createCard("argturus");
 //console.log(card);
 
@@ -281,6 +288,14 @@ function summonMinion(room, player, card) {
 
      room[0].socket.emit("summon_minion", {user_id:player.id, 'minion': minion});
      room[1].socket.emit("summon_minion", {user_id:player.id, 'minion': minion});
+
+    console.log("zoz");
+    console.log(card);
+     if(card.battlecry) {
+        console.log("calling battlecry");
+        console.log(card);
+        card.battlecry(room, player, card);
+     }
 }
 
 function spendMana(room, player, card) {
@@ -311,6 +326,8 @@ function createCard(id) {
     card.title = obj.title;
     card.description = obj.description;
     card.cost = obj.cost;
+    card.deck = obj.deck;
+    card.battlecry = obj.battlecry;
     card.minion = obj.minion;
     card.spell = obj.spell;
 
@@ -353,6 +370,10 @@ function initPlayer(socket, id) {
         var keys = Object.keys(cardMap);
         var name = cardMap[keys[Math.floor(keys.length * Math.random())]].id;
         var card = createCard(name);
+        if(card.deck == false) {
+            i++;
+            continue;
+        }
         player.deck.push(card);
     }
 

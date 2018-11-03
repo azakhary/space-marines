@@ -5,6 +5,7 @@ import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
 import com.rockbite.hackathon.sm.communications.actions.HeroSync;
 import com.rockbite.hackathon.sm.communications.actions.MinionAttackAnim;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
+import com.rockbite.hackathon.sm.communications.actions.SummonMinion;
 import com.rockbite.hackathon.sm.components.CardComponent;
 
 import org.json.JSONException;
@@ -82,7 +83,9 @@ public class Network {
                     try {
                         int user_id = obj.getInt("user_id");
                         JSONObject minionJson = obj.getJSONObject("minion");
-                        Comm.get().gameLogic.summonMinion(user_id, minionJson);
+                        SummonMinion action = Comm.get().getAction(SummonMinion.class);
+                        action.set(user_id, minionJson);
+                        Comm.get().sendAction(action);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

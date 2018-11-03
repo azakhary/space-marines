@@ -25,6 +25,60 @@ public class MinionSystem extends EntitySystem {
         entities = engine.getEntitiesFor(Family.all(MinionComponent.class).get());
     }
 
+    public void positionMinion(TransformComponent transform, MinionComponent minion) {
+        int currPlayerId = Comm.get().gameLogic.uniqueUserId;
+        int opponentPlayerId = Comm.get().gameLogic.opponentUserId;
+        Viewport viewport = Comm.get().gameLogic.getEngine().getSystem(RenderSystem.class).viewport;
+
+        if(!transform.actor.hasActions()) {
+            if (minion.user_id == currPlayerId) {
+                // current player
+                if (minion.slot == 0) {
+                    transform.x = -200f - 60f;
+                    transform.y = 0 - viewport.getWorldHeight() / 2f + 20f + 360f;
+                }
+                if (minion.slot == 1) {
+                    transform.x = -60f;
+                    transform.y = 0 - viewport.getWorldHeight() / 2f + 20f + 360f;
+                }
+                if (minion.slot == 2) {
+                    transform.x = +200f - 60f;
+                    transform.y = 0 - viewport.getWorldHeight() / 2f + 20f + 360f;
+                }
+                if (minion.slot == 3) {
+                    transform.x = -200f - 60f;
+                    transform.y = 0 - viewport.getWorldHeight() / 2f + 20f + 190f;
+                }
+                if (minion.slot == 4) {
+                    transform.x = +200f - 60f;
+                    transform.y = 0 - viewport.getWorldHeight() / 2f + 20f + 190f;
+                }
+
+            } else {
+                if (minion.slot == 0) {
+                    transform.x = -200f - 60f;
+                    transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 450f;
+                }
+                if (minion.slot == 1) {
+                    transform.x = -60f;
+                    transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 450f;
+                }
+                if (minion.slot == 2) {
+                    transform.x = +200f - 60f;
+                    transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 450f;
+                }
+                if (minion.slot == 3) {
+                    transform.x = -200f - 60f;
+                    transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 280f;
+                }
+                if (minion.slot == 4) {
+                    transform.x = +200f - 60f;
+                    transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 258f;
+                }
+            }
+        }
+    }
+
     public void update(float deltaTime) {
         int currPlayerId = Comm.get().gameLogic.uniqueUserId;
         int opponentPlayerId = Comm.get().gameLogic.opponentUserId;
@@ -37,53 +91,7 @@ public class MinionSystem extends EntitySystem {
             Viewport viewport = Comm.get().gameLogic.getEngine().getSystem(RenderSystem.class).viewport;
 
 
-            if(!transform.actor.hasActions()) {
-                if (minion.user_id == currPlayerId) {
-                    // current player
-                    if (minion.slot == 0) {
-                        transform.x = -200f - 60f;
-                        transform.y = 0 - viewport.getWorldHeight() / 2f + 20f + 360f;
-                    }
-                    if (minion.slot == 1) {
-                        transform.x = -60f;
-                        transform.y = 0 - viewport.getWorldHeight() / 2f + 20f + 360f;
-                    }
-                    if (minion.slot == 2) {
-                        transform.x = +200f - 60f;
-                        transform.y = 0 - viewport.getWorldHeight() / 2f + 20f + 360f;
-                    }
-                    if (minion.slot == 3) {
-                        transform.x = -200f - 60f;
-                        transform.y = 0 - viewport.getWorldHeight() / 2f + 20f + 190f;
-                    }
-                    if (minion.slot == 4) {
-                        transform.x = +200f - 60f;
-                        transform.y = 0 - viewport.getWorldHeight() / 2f + 20f + 190f;
-                    }
-
-                } else {
-                    if (minion.slot == 0) {
-                        transform.x = -200f - 60f;
-                        transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 450f;
-                    }
-                    if (minion.slot == 1) {
-                        transform.x = -60f;
-                        transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 450f;
-                    }
-                    if (minion.slot == 2) {
-                        transform.x = +200f - 60f;
-                        transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 450f;
-                    }
-                    if (minion.slot == 3) {
-                        transform.x = -200f - 60f;
-                        transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 280f;
-                    }
-                    if (minion.slot == 4) {
-                        transform.x = +200f - 60f;
-                        transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 258f;
-                    }
-                }
-            }
+           positionMinion(transform, minion);
 
 
             minion.cooldown -= deltaTime;

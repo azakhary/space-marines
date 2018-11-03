@@ -8,6 +8,7 @@ import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
 import com.rockbite.hackathon.sm.communications.actions.HeroSync;
 import com.rockbite.hackathon.sm.communications.actions.MinionAttackAnim;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
+import com.rockbite.hackathon.sm.communications.actions.SummonMinion;
 
 import java.util.HashMap;
 
@@ -26,6 +27,7 @@ public class ActionPool {
         register(MinionUpdate.class);
         register(HeroSync.class);
         register(MinionAttackAnim.class);
+        register(SummonMinion.class);
     }
 
     private <T extends Action> void register(final Class<T> clazz) {

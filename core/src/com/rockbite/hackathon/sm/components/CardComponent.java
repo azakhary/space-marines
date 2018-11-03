@@ -46,8 +46,8 @@ public class CardComponent implements Component {
 
     public class Minion {
 
-        int atk;
-        int hp;
+        public int atk;
+        public int hp;
 
         public Minion(JSONObject minion) throws JSONException {
             atk = minion.getInt("atk");

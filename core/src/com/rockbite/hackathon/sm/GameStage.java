@@ -24,6 +24,10 @@ public class GameStage extends Stage {
     Label titleLabel;
     Label descriptionLabel;
 
+    Label atkLbl;
+    Label hpLbl;
+    Label costLbl;
+
     public GameStage() {
         getRoot().setTouchable(Touchable.disabled);
     }
@@ -52,11 +56,22 @@ public class GameStage extends Stage {
         descriptionLabel.setPosition(160 - descriptionLabel.getWidth()/2f, 120 - descriptionLabel.getHeight());
         descriptionLabel.setWrap(true);
 
+        atkLbl = new Label("1", Comm.get().gameLogic.getAssets().labelStyleSmall);
+        atkLbl.setPosition(45, 172);
+        hpLbl = new Label("1", Comm.get().gameLogic.getAssets().labelStyleSmall);
+        hpLbl.setPosition(254, 172);
+        costLbl = new Label("1", Comm.get().gameLogic.getAssets().labelStyleSmall);
+        costLbl.setPosition(157, 468);
+
+
         cardDialog.addActor(cardImage);
         cardDialog.addActor(cardBg);
         cardDialog.addActor(textBg);
         cardDialog.addActor(titleLabel);
         cardDialog.addActor(descriptionLabel);
+        cardDialog.addActor(atkLbl);
+        cardDialog.addActor(hpLbl);
+        cardDialog.addActor(costLbl);
         cardDialog.getColor().a = 0;
 
         cardDialog.setSize(300, 485);
@@ -87,6 +102,10 @@ public class GameStage extends Stage {
         ((TextureRegionDrawable)cardImage.getDrawable()).setRegion(Comm.get().gameLogic.getAssets().atlas.findRegion(card.id+"-card"));
         titleLabel.setText(card.title);
         descriptionLabel.setText(card.description);
+
+        atkLbl.setText(card.minion.atk+"");
+        hpLbl.setText(card.minion.hp+"");
+        costLbl.setText(card.cost+"");
     }
 
     public void hideCardDiallog() {

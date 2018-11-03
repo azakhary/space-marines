@@ -18,6 +18,7 @@ import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
 import com.rockbite.hackathon.sm.communications.actions.HeroSync;
 import com.rockbite.hackathon.sm.communications.actions.MinionAttackAnim;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
+import com.rockbite.hackathon.sm.communications.actions.SummonMinion;
 import com.rockbite.hackathon.sm.communications.commands.SendEmoji;
 import com.rockbite.hackathon.sm.components.CardComponent;
 import com.rockbite.hackathon.sm.components.DeckComponent;
@@ -193,6 +194,7 @@ public class GameLogic implements Observer  {
         Comm.get().registerObserver(this, MinionUpdate.class);
         Comm.get().registerObserver(this, HeroSync.class);
         Comm.get().registerObserver(this, MinionAttackAnim.class);
+        Comm.get().registerObserver(this, SummonMinion.class);
     }
 
     @Override
@@ -235,6 +237,11 @@ public class GameLogic implements Observer  {
             engine.getSystem(HeroSystem.class).heroSync(heroSync);
 
             heroSync.setDoneDisplaying(true);
+        }
+
+        if(action instanceof SummonMinion) {
+            final SummonMinion act = (SummonMinion) action;
+            summonMinion(act.user_id, act.minionJson, act);
         }
 
 
@@ -314,7 +321,7 @@ public class GameLogic implements Observer  {
         return engine;
     }
 
-    public void summonMinion(int user_id, JSONObject minionJson) {
+    public void summonMinion(int user_id, JSONObject minionJson, final SummonMinion act) {
         Entity minion = engine.createEntity();
         MinionComponent minionComponent = engine.createComponent(MinionComponent.class);
         TransformComponent transformComponent = engine.createComponent(TransformComponent.class);
@@ -325,5 +332,23 @@ public class GameLogic implements Observer  {
         minion.add(minionComponent);
         minion.add(transformComponent);
         engine.addEntity(minion);
+
+        engine.getSystem(MinionSystem.class).positionMinion(transformComponent, minionComponent);
+
+        minion.getComponent(TransformComponent.class).initActorIfNotInited();
+        minion.getComponent(TransformComponent.class).addAction(
+                Actions.sequence(
+                        Actions.parallel(Actions.fadeIn(0.3f), Actions.scaleTo(1.1f, 1.1f, 0.3f, Interpolation.circleOut)),
+                        Actions.scaleTo(1, 1, 0.1f),
+                        Actions.delay(0.2f),
+                        Actions.run(new Runnable() {
+                            @Override
+                            public void run() {
+                                act.setDoneDisplaying(true);
+                            }
+                        })
+                )
+        );
+
     }
 }
