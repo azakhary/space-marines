@@ -25,6 +25,7 @@ public class Network {
         try {
             //socket = IO.socket("http://10.10.29.151:5555");
             socket = IO.socket("http://127.0.0.1:5555");
+            //socket = IO.socket("http://68.183.121.121:5555");
 
             socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 

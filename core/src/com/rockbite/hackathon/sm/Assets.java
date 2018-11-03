@@ -55,6 +55,7 @@ public class Assets {
         labelStyleSmall    =    new Label.LabelStyle(font_small, Color.WHITE);
 
         music = Gdx.audio.newMusic(Gdx.files.internal("bg-music.mp3"));
+        music.setLooping(true);
 
 
         loadSound("add_card_to_hand_1");

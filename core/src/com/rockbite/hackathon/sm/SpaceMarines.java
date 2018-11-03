@@ -30,7 +30,7 @@ public class SpaceMarines extends ApplicationAdapter {
 		gameLogic.stage = stage;
 		Assets assets = new Assets();
 
-		//assets.music.play();
+		assets.music.play();
 		assets.music.setVolume(0.5f);
 
 		RenderSystem renderSystem = new RenderSystem();
