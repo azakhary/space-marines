@@ -13,6 +13,7 @@ var connectionRooms = {};
 var currentConnections = {};
 
 const MANA_SPEED = 0.1;
+const MINON_COOLDOWN = 5;
 
 /*
 MongoClient.connect("mongodb://localhost:27017/space-marines", function (err, db) {
@@ -63,7 +64,7 @@ function initSocketIO() {
        });
        socket.on('disconnect', function() {
            var room_id = currentConnections[socket.id]['room_id'];
-           if(room_id != undefined && room_id != null) {
+           if(room_id != undefined && room_id != null && connectionRooms[room_id]) {
                connectionRooms[room_id].forEach(function (player) {
                    if(player.socket.id != socket.id) {
                        players.push({socket:player.socket, id:player.id});
@@ -161,6 +162,23 @@ function minionAttackCommand(socket, data) {
          }
     });
 
+    var fromCooldown = getMinionCooldown(fromPlayer.board[target_slot]);
+    var toCooldown = getMinionCooldown(toPlayer.board[target_slot]);
+    if(fromCooldown > 0) {
+        // Can't attack should not get there
+        console.error("Error cannot attack, minion is still on it's cooldown, Client should check, shoud not get here");
+        return;
+    }
+
+    var curr = new Date().getTime();
+    fromPlayer.board[target_slot].cooldown = MINON_COOLDOWN; // Reset attackers cooldown
+    toPlayer.board[target_slot].cooldown = toCooldown;
+    fromPlayer.board[target_slot].time = curr;
+
+    console.log("fromCooldown:", fromCooldown, "toCooldown:", toCooldown);
+
+    if(fromPlayer.board[target_slot].cooldown)
+
     toPlayer.board[target_slot].hp -= fromPlayer.board[from_slot].atk;
     fromPlayer.board[from_slot].hp -= toPlayer.board[target_slot].atk;
 
@@ -170,6 +188,7 @@ function minionAttackCommand(socket, data) {
     if(fromPlayer.board[from_slot].hp <= 0) {
         fromPlayer.board[from_slot].destroyed = true;
     }
+
 
     toPlayer.socket.emit("minion_update", {user_id:toPlayer.id, slot_id: target_slot, minion: toPlayer.board[target_slot]});
     toPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
@@ -183,6 +202,22 @@ function minionAttackCommand(socket, data) {
     if(fromPlayer.board[from_slot].destroyed == true) {
         fromPlayer.board.splice(from_slot, from_slot + 1);
     }
+}
+
+function getMinionCooldown(minion) {
+    var curr = new Date().getTime();
+
+    var time = minion.time;
+
+    var timePassedSec = ( curr - time ) / 1000;
+
+    var cooldown = MINON_COOLDOWN - timePassedSec;
+
+    if(cooldown <= 0) {
+        cooldown = 0;
+    }
+
+    return cooldown;
 }
 
 function Player() {
@@ -207,6 +242,9 @@ function summonMinion(room, player, card) {
      minion.id = card.id;
 
      minion.card = card;
+
+     minion.time = new Date().getTime();
+     minion.cooldown = MINON_COOLDOWN;
 
      player.board.push(minion);
 
