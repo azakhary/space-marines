@@ -170,8 +170,8 @@ function minionAttackCommand(socket, data) {
         return;
     }
 
-    fromPlayer.board[target_slot].cooldown = MINON_COOLDOWN; // Reset attackers cooldown
-    fromPlayer.board[target_slot].time = new Date().getTime();
+    fromPlayer.board[from_slot].cooldown = MINON_COOLDOWN; // Reset attackers cooldown
+    fromPlayer.board[from_slot].time = new Date().getTime();
 
     if(data.is_target_hero == true) {
         // hero being attacked
@@ -179,6 +179,9 @@ function minionAttackCommand(socket, data) {
         if(toPlayer.hp <= 0) {
             toPlayer.hp = 0;
         }
+
+        fromPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
+        toPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
 
         console.log("new hp: " + toPlayer.hp);
         syncHero(toPlayer, toPlayer);
@@ -309,6 +312,7 @@ function initPlayer(socket, id) {
     player.hand = [];
 
     //player character
+    
 
     player.hp = 30;
     player.max_hp = 30;

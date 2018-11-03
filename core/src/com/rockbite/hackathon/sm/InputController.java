@@ -134,6 +134,7 @@ public class InputController {
         if(!isHero) {
             // is minion
             MinionComponent mc = mcMapper.get(draggingEntity);
+            if(mc.cooldown > 0) return;
             MinionAttack minionAttack = Comm.get().getCommand(MinionAttack.class);
             minionAttack.fromSlot = mc.slot;
             minionAttack.isHero = false;
@@ -142,6 +143,7 @@ public class InputController {
         } else {
             // is hero
             MinionComponent mc = mcMapper.get(draggingEntity);
+            if(mc.cooldown > 0) return;
             HeroComponent hero = targetEntity.getComponent(HeroComponent.class);
             MinionAttack minionAttack = Comm.get().getCommand(MinionAttack.class);
             minionAttack.fromSlot = mc.slot;
