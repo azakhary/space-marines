@@ -271,20 +271,8 @@ function summonMinion(room, player, card) {
 
 function spendMana(room, player, card) {
     var curr = new Date().getTime();
-    var time = player.lastSpentTime ? player.lastSpentTime : curr;
 
-    var passedTimeSec = ( curr - time ) / 1000;
-
-    var mana = player.mana;
-
-    mana += ( passedTimeSec * MANA_SPEED );
-
-    if(mana > player.maxMana) {
-        mana = player.maxMana;
-    }
-    else {
-        mana = Math.floor(mana);
-    }
+    var mana = getMana(player, curr);
 
     if(mana >= card.cost) {
         mana -= card.cost;
@@ -292,7 +280,7 @@ function spendMana(room, player, card) {
         player.mana = mana;
         player.lastSpentTime = curr;
 
-        syncHero(player, player);
+        syncHero(player, player, true);
 
         return true;
     }
@@ -379,8 +367,27 @@ function drawCard(player) {
     player.socket.emit("draw_card", {user_id:player.id, card: crd});
 }
 
-function syncHero(sendToPlayer, player) {
-    var data = {user_id:player.id, 'mana': player.mana, 'hp': player.hp, 'max_hp': player.max_hp};
-    console.log("hero sync: " + data);
+function syncHero(sendToPlayer, player, manaCalculated) {
+    var mana = manaCalculated ? player.mana : getMana(player, new Date().getTime());
+    var data = {user_id:player.id, 'mana': mana, 'hp': player.hp, 'max_hp': player.max_hp};
+    console.log("hero sync: " + JSON.stringify(data));
     sendToPlayer.socket.emit("hero_sync", data);
+}
+
+function getMana(player, curr) {
+    var time = player.lastSpentTime ? player.lastSpentTime : curr;
+
+    var passedTimeSec = ( curr - time ) / 1000;
+
+    var mana = player.mana;
+
+    mana += ( passedTimeSec * MANA_SPEED );
+
+    if(mana > player.maxMana) {
+        mana = player.maxMana;
+    }
+    else {
+        mana = Math.floor(mana);
+    }
+    return mana;
 }
