@@ -208,8 +208,10 @@ public class RenderSystem extends EntitySystem {
             TransformComponent transform = tcMapper.get(minionEntities.get(i));
             // render current player deck
             float off = 10f;
+            batch.setColor(transform.tint);
             batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(minion.id + "-card"), transform.x + transform.offsetX+off, transform.y+transform.offsetY+off, transform.width-off-10, transform.height-off-10);
             batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-board"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width, transform.height);
+            batch.setColor(Color.WHITE);
 
             Label label  = Comm.get().gameLogic.getAssets().label;
             label.setText(minion.atk + "");

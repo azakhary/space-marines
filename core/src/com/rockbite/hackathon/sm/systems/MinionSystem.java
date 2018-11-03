@@ -83,6 +83,15 @@ public class MinionSystem extends EntitySystem {
                 }
             }
 
+            minion.cooldown -= deltaTime;
+            if( minion.cooldown < 0)  minion.cooldown = 0;
+            float cooldownAlpha = (5f -  minion.cooldown)/5f;
+
+            // cooldown tint
+            transform.tint.r = cooldownAlpha;
+            transform.tint.g = cooldownAlpha;
+            transform.tint.b = cooldownAlpha;
+            transform.tint.a = 0.5f + cooldownAlpha/2f;
 
         }
     }
