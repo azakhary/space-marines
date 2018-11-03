@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.rockbite.hackathon.sm.communications.Action;
 import com.rockbite.hackathon.sm.communications.Comm;
 import com.rockbite.hackathon.sm.communications.Network;
@@ -19,12 +20,14 @@ import com.rockbite.hackathon.sm.components.EmojiComponent;
 import com.rockbite.hackathon.sm.components.GameComponent;
 import com.rockbite.hackathon.sm.components.HeroComponent;
 import com.rockbite.hackathon.sm.components.MinionComponent;
+import com.rockbite.hackathon.sm.components.render.DrawableComponent;
 import com.rockbite.hackathon.sm.components.render.TransformComponent;
 import com.rockbite.hackathon.sm.systems.CardSystem;
 import com.rockbite.hackathon.sm.systems.EmojiSystem;
 import com.rockbite.hackathon.sm.systems.GameSystem;
 import com.rockbite.hackathon.sm.systems.HeroSystem;
 import com.rockbite.hackathon.sm.systems.MinionSystem;
+import com.rockbite.hackathon.sm.systems.RenderSystem;
 import com.rockbite.hackathon.sm.systems.SpellSystem;
 
 import org.json.JSONObject;
@@ -32,7 +35,7 @@ import org.json.JSONObject;
 public class GameLogic implements Observer  {
     private PooledEngine engine;
 
-    private Entity gameEntity;
+    public Entity gameEntity;
     private Entity[] players;
 
     private Array<Array<Entity>> cards;
@@ -67,6 +70,22 @@ public class GameLogic implements Observer  {
         registerActionChannels();
     }
 
+    private void initSomeDrawables() {
+        Viewport viewport = engine.getSystem(RenderSystem.class).viewport;
+
+        SpriteUtils.createSprite( engine, "bottom", -viewport.getWorldWidth()/2f, -viewport.getWorldHeight()/2f, 600, 355, 0);
+
+        SpriteUtils.createSprite( engine, "top", -viewport.getWorldWidth()/2f, viewport.getWorldHeight()/2f-247, 600, 247, 1);
+
+
+        // some fake UI
+        // goes from 0 to 430
+        Entity mana = SpriteUtils.createNinePatch(engine, "progress_body", -viewport.getWorldWidth()/2f + 45, -viewport.getWorldHeight()/2f + 10, 0, 30, 0.5f, 2);
+        SpriteUtils.createNinePatch(engine, "progress_bg", -viewport.getWorldWidth()/2f + 10, -viewport.getWorldHeight()/2f + 5, 470, 40, 0.5f, 3);
+
+        engine.getSystem(GameSystem.class).setManaEntity(mana);
+    }
+
     public void initGameSession() {
         // generate random user id
         uniqueUserId = MathUtils.random(1, 100000);
@@ -83,7 +102,7 @@ public class GameLogic implements Observer  {
          * Initializing the game entity itself
          */
         gameEntity = engine.createEntity();
-        gameEntity.add(new GameComponent(10f));
+        gameEntity.add(new GameComponent(3 * 60f));
         engine.addEntity(gameEntity);
 
         // need to create both opponents and their decks
@@ -103,6 +122,9 @@ public class GameLogic implements Observer  {
 
 
         createDeck(1, 30);
+
+
+        initSomeDrawables();
     }
 
     public void dispose() {

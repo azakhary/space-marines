@@ -41,45 +41,45 @@ public class MinionSystem extends EntitySystem {
                 // current player
                 if(minion.slot == 0) {
                     transform.x  =  - 200f - 60f;
-                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 370f;
+                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 360f;
                 }
                 if(minion.slot == 1) {
                     transform.x  = - 60f;
-                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 370f;
+                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 360f;
                 }
                 if(minion.slot == 2) {
                     transform.x  = + 200f - 60f;
-                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 370f;
+                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 360f;
                 }
                 if(minion.slot == 3) {
                     transform.x  = - 200f - 60f;
-                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 200f;
+                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 190f;
                 }
                 if(minion.slot == 4) {
                     transform.x  = + 200f - 60f;
-                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 200f;
+                    transform.y = 0  - viewport.getWorldHeight()/2f + 20f + 190f;
                 }
 
             } else {
                 if(minion.slot == 0) {
                     transform.x  =  - 200f - 60f;
-                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 370f;
+                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f -450f;
                 }
                 if(minion.slot == 1) {
                     transform.x  = - 60f;
-                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 370f;
+                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 450f;
                 }
                 if(minion.slot == 2) {
-                    transform.x  = + 200f - 0.6f;
-                    transform.y = 0  + viewport.getWorldHeight()/2f + 0.2f - 3.7f;
+                    transform.x  = + 200f - 60f;
+                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 450f;
                 }
                 if(minion.slot == 3) {
                     transform.x  = - 200f - 60f;
-                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 200f;
+                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 280f;
                 }
                 if(minion.slot == 4) {
                     transform.x  = + 200f - 60f;
-                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 200f;
+                    transform.y = 0  + viewport.getWorldHeight()/2f + 20f - 258f;
                 }
             }
 

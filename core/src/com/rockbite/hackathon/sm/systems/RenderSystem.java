@@ -12,15 +12,19 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.rockbite.hackathon.sm.communications.Comm;
 import com.rockbite.hackathon.sm.components.CardComponent;
 import com.rockbite.hackathon.sm.components.DeckComponent;
 import com.rockbite.hackathon.sm.components.EmojiComponent;
+import com.rockbite.hackathon.sm.components.GameComponent;
 import com.rockbite.hackathon.sm.components.MinionComponent;
+import com.rockbite.hackathon.sm.components.render.DrawableComponent;
 import com.rockbite.hackathon.sm.components.render.TransformComponent;
 
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class RenderSystem extends EntitySystem {
@@ -34,15 +38,40 @@ public class RenderSystem extends EntitySystem {
     private ImmutableArray<Entity> cardEntities;
     private ImmutableArray<Entity> minionEntities;
 
+    private ImmutableArray<Entity> drawables;
+    private Array<Entity> sortedDrawables = new Array<Entity>();
+
+    private Comparator<Entity> comparator;
+
     private ComponentMapper<DeckComponent> dcMapper = ComponentMapper.getFor(DeckComponent.class);
     private ComponentMapper<MinionComponent> mcMapper = ComponentMapper.getFor(MinionComponent.class);
     private ComponentMapper<CardComponent> ccMapper = ComponentMapper.getFor(CardComponent.class);
     private ComponentMapper<TransformComponent> tcMapper = ComponentMapper.getFor(TransformComponent.class);
+    private ComponentMapper<DrawableComponent> drawableMapper = ComponentMapper.getFor(DrawableComponent.class);
 
     public void addedToEngine(Engine engine) {
         deckEntities = engine.getEntitiesFor(Family.all(DeckComponent.class).get());
         cardEntities = engine.getEntitiesFor(Family.all(CardComponent.class).get());
         minionEntities = engine.getEntitiesFor(Family.all(MinionComponent.class).get());
+        drawables = engine.getEntitiesFor(Family.all(DrawableComponent.class).get());
+
+
+
+        comparator = new Comparator<Entity>() {
+            @Override
+            public int compare(Entity o1, Entity o2) {
+                return drawableMapper.get(o1).index -  drawableMapper.get(o2).index;
+            }
+        };
+
+        sortedDrawables.clear();
+        if (drawables.size() > 0) {
+            for(int i = 0; i < drawables.size(); ++i) {
+                sortedDrawables.add(drawables.get(i));
+            }
+
+            sortedDrawables.sort(comparator);
+        }
     }
 
     public RenderSystem() {
@@ -60,13 +89,51 @@ public class RenderSystem extends EntitySystem {
 
         batch.begin();
 
+        renderDrawables(deltaTime);
+
         renderDecks(deltaTime);
 
         renderHand(deltaTime);
 
         renderBoard(deltaTime);
 
+
+        // render some additional labels
+        if(Comm.get().gameLogic.gameEntity != null) {
+            GameComponent game =Comm.get().gameLogic.gameEntity.getComponent(GameComponent.class);
+            int mana = (int) Math.floor(game.mana);
+            Label label = Comm.get().gameLogic.getAssets().label;
+            label.setText(mana + "");
+            label.setPosition(22 - viewport.getWorldWidth() / 2f, 15 - viewport.getWorldHeight() / 2f);
+            label.draw(batch, 1f);
+
+
+
+            int secondsLeft = (int) Math.floor(game.gameDuration - game.timePassed);
+            int minutes = secondsLeft/60;
+            int seconds = secondsLeft - minutes*60;
+            label = Comm.get().gameLogic.getAssets().label;
+            label.setText(minutes + " : " + seconds);
+            label.setPosition(- label.getWidth()/2f - 10, viewport.getWorldHeight() / 2f - 10f - label.getHeight());
+            label.draw(batch, 1f);
+        }
+
         batch.end();
+    }
+
+    private void renderDrawables(float deltaTime) {
+        for (int i = 0; i < drawables.size(); ++i) {
+            DrawableComponent drawable = drawableMapper.get(drawables.get(i));
+            TransformComponent transform = tcMapper.get(drawables.get(i));
+
+            if(drawable.ninePatch != null) {
+                drawable.ninePatch.draw(batch, transform.x, transform.y, transform.width, transform.height);
+            } else if(drawable.sprite != null) {
+                drawable.sprite.setPosition(transform.x, transform.y);
+                drawable.sprite.setSize(transform.width, transform.height);
+                drawable.sprite.draw(batch, 1);
+            }
+        }
     }
 
     private void renderDecks(float deltaTime) {
@@ -77,7 +144,7 @@ public class RenderSystem extends EntitySystem {
             DeckComponent component = dcMapper.get(deckEntities.get(i));
             if(component.playerId == currPlayerId) {
                 // render current player deck
-                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-back"), viewport.getWorldWidth()/2f - 100f - 20f, -viewport.getWorldHeight()/2f + 20f, 100f, 131f);
+                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("deck"), viewport.getWorldWidth()/2f - 100f - 20f, -viewport.getWorldHeight()/2f + 20f, 100f, 131f);
            }
         }
     }
@@ -90,10 +157,12 @@ public class RenderSystem extends EntitySystem {
             CardComponent card = ccMapper.get(cardEntities.get(i));
             TransformComponent transform = tcMapper.get(cardEntities.get(i));
 
-            //if(component.playerId == currPlayerId) {
+            if(card.playerId == currPlayerId) {
                 // render current player deck
-                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(card.id + "-front"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width, transform.height);
-            //}
+                float off = 10f;
+                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(card.id + "-card"), transform.x + transform.offsetX+off, transform.y+transform.offsetY+off, transform.width-off-10, transform.height-off-10);
+                batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-hand"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width, transform.height);
+            }
         }
     }
 
@@ -103,7 +172,9 @@ public class RenderSystem extends EntitySystem {
             MinionComponent minion = mcMapper.get(minionEntities.get(i));
             TransformComponent transform = tcMapper.get(minionEntities.get(i));
             // render current player deck
-            batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(minion.id + "-board"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width, transform.height);
+            float off = 10f;
+            batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(minion.id + "-card"), transform.x + transform.offsetX+off, transform.y+transform.offsetY+off, transform.width-off-10, transform.height-off-10);
+            batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-board"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width, transform.height);
 
             Label label  = Comm.get().gameLogic.getAssets().label;
             label.setText(minion.atk + "");

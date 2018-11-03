@@ -31,7 +31,7 @@ public class CardSystem extends EntitySystem {
             Viewport viewport = Comm.get().gameLogic.getEngine().getSystem(RenderSystem.class).viewport;
 
             transform.x  = (card.slot * 110f) - viewport.getWorldWidth()/2f + 20f;
-            transform.y = 0  - viewport.getWorldHeight()/2f + 20f;
+            transform.y = 0  - viewport.getWorldHeight()/2f + 40f;
         }
     }
 

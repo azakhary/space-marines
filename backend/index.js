@@ -228,6 +228,9 @@ function initPlayer(socket, id) {
     player.deck = [];
     player.hand = [];
 
+    player.mana = 0;
+    player.maxMana = 10;
+
     player.deckLock = true;
     setTimeout(function() {
         player.deckLock = false;
@@ -236,7 +239,10 @@ function initPlayer(socket, id) {
 
     player.board = [];
     for(var i = 0; i < 30; i++) {
-        var card = createCard("argturus");
+
+        var keys = Object.keys(cardMap);
+        var name = cardMap[keys[Math.floor(keys.length * Math.random())]].id;
+        var card = createCard(name);
         player.deck.push(card);
     }
 

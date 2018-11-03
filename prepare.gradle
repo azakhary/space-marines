@@ -39,10 +39,10 @@ task packTextures(dependsOn: "build") {
 
     TexturePacker.Settings settings =   new TexturePacker.Settings();
 
-    settings.maxWidth       =   2048;
-    settings.maxHeight      =   2048;
-    settings.filterMin = Texture.TextureFilter.Linear;
-    settings.filterMag = Texture.TextureFilter.Linear;
+    settings.maxWidth       =   1024;
+    settings.maxHeight      =   1024;
+    settings.filterMin = Texture.TextureFilter.Nearest;
+    settings.filterMag = Texture.TextureFilter.Nearest;
 
     TexturePacker.processIfModified(settings, srcPath, dstPath, "pack")
 }
