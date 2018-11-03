@@ -73,7 +73,7 @@ public class MinionSystem extends EntitySystem {
                 }
                 if (minion.slot == 4) {
                     transform.x = +200f - 60f;
-                    transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 258f;
+                    transform.y = 0 + viewport.getWorldHeight() / 2f + 20f - 280f;
                 }
             }
         }
@@ -115,6 +115,8 @@ public class MinionSystem extends EntitySystem {
                 if(minionUpdate.destroyed != true) {
                     minion.atk = minionUpdate.atk;
                     minion.hp = minionUpdate.hp;
+                    minion.maxHP = minionUpdate.maxHP;
+                    minion.maxATK = minionUpdate.maxATK;
                     minion.cooldown = minionUpdate.cooldown;
                 } else {
                     getEngine().removeEntity(entities.get(i));

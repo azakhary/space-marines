@@ -72,6 +72,7 @@ public class InputController {
 
                 if(draggingEntity != null) {
                     TransformComponent tc = tcMapper.get(draggingEntity);
+                    if(tc == null) return; // weird
 
                     tc.offsetX = currTouch.x - firstTouch.x;
                     tc.offsetY = currTouch.y - firstTouch.y;

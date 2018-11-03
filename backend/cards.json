@@ -16,7 +16,7 @@
   {
     "id": "eduard",
     "type": "minion",
-    "title": "Ed",
+    "title": "Eduard",
     "description": "Has +2 attack if Gayush is around",
     "cost": 4,
     "deck": true,
@@ -36,7 +36,7 @@
     "deck": true,
     "minion": {
       "atk": 5,
-      "hp": 2
+      "hp": 3
     },
     "spell": {
     }
@@ -115,7 +115,7 @@
     "id": "hayk",
     "type": "minion",
     "title": "Kirakos",
-    "description": "Has 50% can attack immediately after attack",
+    "description": "Has 50% chance, to attack immediately after attack",
     "cost": 3,
     "deck": true,
     "minion": {

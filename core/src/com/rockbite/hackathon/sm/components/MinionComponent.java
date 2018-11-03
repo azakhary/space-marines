@@ -12,6 +12,8 @@ public class MinionComponent implements Component {
     public String id;
     public int atk;
     public int hp;
+    public int maxHP;
+    public int maxATK;
 
     public float cooldown;
 
@@ -24,6 +26,8 @@ public class MinionComponent implements Component {
             id = minionJson.getString("id");
             atk = minionJson.getInt("atk");
             hp = minionJson.getInt("hp");
+            maxHP = minionJson.getInt("max_hp");
+            maxATK = atk;
 
             cooldown = (float) minionJson.getDouble("cooldown");
 

@@ -94,6 +94,8 @@ public class RenderSystem extends EntitySystem {
 
         batch.begin();
 
+        renderBg();
+
         renderDrawables(deltaTime);
 
         renderDecks(deltaTime);
@@ -126,6 +128,13 @@ public class RenderSystem extends EntitySystem {
         }
 
         batch.end();
+    }
+
+    private void renderBg() {
+        batch.setColor(Color.WHITE);
+        batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("full-bg"), - viewport.getWorldWidth()/2f, -viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight());
+        batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("loose"), - viewport.getWorldWidth()/2f, -viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight());
+
     }
 
     private void renderHeroes(float deltaTime) {
@@ -214,14 +223,29 @@ public class RenderSystem extends EntitySystem {
             batch.setColor(Color.WHITE);
 
             Label label  = Comm.get().gameLogic.getAssets().label;
+            if(minion.atk < minion.maxATK) {
+                label.setColor(Color.RED);
+            } else if(minion.atk > minion.maxATK){
+                label.setColor(Color.GREEN);
+            } else {
+                label.setColor(Color.WHITE);
+            }
             label.setText(minion.atk + "");
             label.setPosition(transform.x + transform.offsetX + 10f, transform.y+transform.offsetY);
             label.draw(batch, 1f);
 
             label  = Comm.get().gameLogic.getAssets().label;
+            if(minion.hp < minion.maxHP) {
+                label.setColor(Color.RED);
+            } else if(minion.hp > minion.maxHP){
+                label.setColor(Color.GREEN);
+            } else {
+                label.setColor(Color.WHITE);
+            }
             label.setText(minion.hp + "");
             label.setPosition(transform.x + transform.offsetX + 98f, transform.y+transform.offsetY);
             label.draw(batch, 1f);
+            label.setColor(Color.WHITE);
 
             // cooldown
             if(minion.cooldown > 0) {

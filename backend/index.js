@@ -12,7 +12,7 @@ var roomIdInc = 0;
 var connectionRooms = {};
 var currentConnections = {};
 
-const MANA_SPEED = 1.1;
+const MANA_SPEED = 0.5;
 const MINON_COOLDOWN = 5;
 
 /*
@@ -31,8 +31,12 @@ MongoClient.connect("mongodb://localhost:27017/space-marines", function (err, db
 // init data config
 var cards = JSON.parse(fs.readFileSync("cards.json"));
 var cardMap = new Array();
+var drawableCards = new Array();
 for(var i = 0; i < cards.length; i++) {
     cardMap[cards[i].id+''] = cards[i];
+    if( cards[i].deck == true) {
+        drawableCards.push(cards[i]);
+    }
 }
 
 cardMap["ach"].battlecry = function(room, player, card) {
@@ -42,8 +46,122 @@ cardMap["ach"].battlecry = function(room, player, card) {
     summonMinion(room, player, cardMap["dave"]);
 }
 
+cardMap["eduard"].on_board_change = function(board, thisMinion, isSameBoard, player1, player2, minionOwner) {
+    if(!isSameBoard) return;
+    for(key in minionOwner.board) {
+        var minion = board[key];
+        if(minion.card.id == "gayush") {
+
+            // gain +2 atk
+            if(thisMinion.buffed != true) {
+                thisMinion.atk += 2;
+                thisMinion.buffed = true;
+
+                player1.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
+                player2.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
+
+                console.log("buff achieved");
+            }
+
+            return;
+        }
+    }
+
+    if(thisMinion.buffed == true) {
+       thisMinion.buffed = false;
+       thisMinion.atk -= 2;
+
+       player1.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
+       player2.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
+
+       console.log("debuff happened");
+    }
+
+}
+
+cardMap["grachik"].on_attack_minion = function(minionOwner, thisMinion, player1, player2, rooms) {
+    // custom battlecry for ach
+    console.log("grach attacked");
+
+    if(Math.random() < 0.5) {
+        // grach needs to explode
+        console.log("grachik will explode")
+
+        destroyMinion(thisMinion, player1, player2, minionOwner, rooms);
+    }
+}
+
+cardMap["gayush"].repeat = function(minion, player, room) {
+
+    console.log("gayush wotakuu!");
+
+    // iterate through neighbours and heal one of them
+    var board = player.board;
+
+    var minArr = [];
+
+    for(key in board) {
+        var currMinion = board[key];
+        if(currMinion.hp < currMinion.max_hp) {
+            minArr.push(currMinion);
+        }
+    }
+    var randMinion;
+    console.log(board);
+    if(minArr.length > 0) {
+        randMinion = minArr[Math.floor(Math.random() * minArr.length)];
+
+        // heal randMinion
+       randMinion.hp += 1;
+       if(randMinion.hp > randMinion.max_hp) randMinion.hp = randMinion.max_hp;
+       room[0].socket.emit("minion_update", {user_id:player.id, slot_id: randMinion.slot, minion: randMinion});
+       room[1].socket.emit("minion_update", {user_id:player.id, slot_id: randMinion.slot, minion: randMinion});
+    }
+}
+
+cardMap["avik"].on_board_change = function(board, thisMinion, isSameBoard, player1, player2, minionOwner) {
+    if(!isSameBoard) return;
+
+    if(minionOwner.board.length > 1) {
+         // gain +2 atk
+        if(thisMinion.buffed != true) {
+            thisMinion.atk += 5;
+            thisMinion.hp += 5;
+            thisMinion.buffed = true;
+
+            player1.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
+            player2.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
+
+            console.log("buff achieved");
+        }
+    } else {
+        if(thisMinion.buffed == true) {
+           thisMinion.buffed = false;
+           thisMinion.atk -= 5;
+           thisMinion.hp -= 5;
+
+           player1.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
+           player2.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
+
+           console.log("debuff happened");
+        }
+    }
+
+}
+
 //var card = createCard("argturus");
 //console.log(card);
+
+
+function destroyMinion(thisMinion, player1, player2, minionOwner, rooms) {
+    thisMinion.hp = 0;
+    thisMinion.destroyed = true;
+    player1.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
+    player2.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
+    if(thisMinion.card.repeat && thisMinion.card.repeat.timer) clearInterval(thisMinion.card.repeat.timer);
+    minionOwner.board.splice(thisMinion.slot, thisMinion.slot + 1);
+    onBoardChange(rooms, thisMinion.board);
+}
 
 
 function initSocketIO() {
@@ -214,9 +332,11 @@ function minionAttackCommand(socket, data) {
 
         if(toPlayer.board[target_slot].hp <= 0) {
             toPlayer.board[target_slot].destroyed = true;
+            if(toPlayer.board[target_slot].card.repeat && toPlayer.board[target_slot].card.repeat.timer) clearInterval(toPlayer.board[target_slot].card.repeat.timer);
         }
         if(fromPlayer.board[from_slot].hp <= 0) {
             fromPlayer.board[from_slot].destroyed = true;
+            if(fromPlayer.board[from_slot].card.repeat && fromPlayer.board[from_slot].card.repeat.timer) clearInterval(fromPlayer.board[from_slot].card.repeat.timer);
         }
 
         // initiate attack anim
@@ -229,12 +349,21 @@ function minionAttackCommand(socket, data) {
         fromPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
         fromPlayer.socket.emit("minion_update", {user_id:toPlayer.id, slot_id: target_slot, minion: toPlayer.board[target_slot]});
 
-        if(toPlayer.board[target_slot].destroyed == true) {
+
+        if(!fromPlayer.board[from_slot].destroyed && fromPlayer.board[from_slot].card.on_attack_minion) {
+            fromPlayer.board[from_slot].card.on_attack_minion(fromPlayer, fromPlayer.board[from_slot], toPlayer, fromPlayer, connectionRooms[room_id]);
+        }
+
+        if(toPlayer.board[target_slot] && toPlayer.board[target_slot].destroyed == true) {
             toPlayer.board.splice(target_slot, target_slot + 1);
+            onBoardChange(connectionRooms[room_id], toPlayer.board);
         }
-        if(fromPlayer.board[from_slot].destroyed == true) {
+        if(fromPlayer.board[from_slot] && fromPlayer.board[from_slot].destroyed == true) {
             fromPlayer.board.splice(from_slot, from_slot + 1);
+            onBoardChange(connectionRooms[room_id], fromPlayer.board);
         }
+
+
     }
 
 }
@@ -271,8 +400,12 @@ function Card() {
 function summonMinion(room, player, card) {
      var minion = {};
 
+     if( player.board.length > 4) return;
+
      minion.atk = card.minion.atk;
+     minion.max_atk = card.minion.atk;
      minion.hp = card.minion.hp;
+     minion.max_hp = card.minion.hp;
      minion.destroyed = false;
 
      minion.id = card.id;
@@ -289,13 +422,34 @@ function summonMinion(room, player, card) {
      room[0].socket.emit("summon_minion", {user_id:player.id, 'minion': minion});
      room[1].socket.emit("summon_minion", {user_id:player.id, 'minion': minion});
 
-    console.log("zoz");
-    console.log(card);
+
      if(card.battlecry) {
-        console.log("calling battlecry");
-        console.log(card);
         card.battlecry(room, player, card);
      }
+
+     // go through all minions on board and summon their cards on_board_change
+     onBoardChange(room, player.board);
+
+
+     if(minion.card.repeat) {
+        minion.card.repeat.timer = setInterval(function() { minion.card.repeat(minion, player, room); }, 10000);
+     }
+
+}
+
+function onBoardChange(rooms, board) {
+    for(key in rooms[0].board) {
+        var informedMinion = rooms[0].board[key];
+        if(informedMinion.card.on_board_change) {
+            informedMinion.card.on_board_change(board, informedMinion, board == rooms[0].board, rooms[0], rooms[1], rooms[0]);
+        }
+    }
+    for(key in rooms[1].board) {
+        var informedMinion = rooms[1].board[key];
+        if(informedMinion.card.on_board_change) {
+            informedMinion.card.on_board_change(board, informedMinion, board == rooms[1].board, rooms[0], rooms[1], rooms[1]);
+        }
+    }
 }
 
 function spendMana(room, player, card) {
@@ -328,6 +482,9 @@ function createCard(id) {
     card.cost = obj.cost;
     card.deck = obj.deck;
     card.battlecry = obj.battlecry;
+    card.on_board_change = obj.on_board_change;
+    card.on_attack_minion = obj.on_attack_minion;
+    card.repeat = obj.repeat;
     card.minion = obj.minion;
     card.spell = obj.spell;
 
@@ -366,9 +523,8 @@ function initPlayer(socket, id) {
 
     player.board = [];
     for(var i = 0; i < 30; i++) {
-
-        var keys = Object.keys(cardMap);
-        var name = cardMap[keys[Math.floor(keys.length * Math.random())]].id;
+        var keys = Object.keys(drawableCards);
+        var name = drawableCards[keys[Math.floor(keys.length * Math.random())]].id;
         var card = createCard(name);
         if(card.deck == false) {
             i++;
@@ -390,6 +546,7 @@ function initPlayer(socket, id) {
 }
 
 function tryToDraw(player) {
+console.log(player.hand.length + " length of hand");
     if(player.hand.length < 4) {
         drawCard(player);
 

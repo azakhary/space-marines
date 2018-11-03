@@ -11,7 +11,9 @@ public class MinionUpdate extends Action {
     public int slot_id;
 
     public int atk;
+    public int maxATK;
     public int hp;
+    public int maxHP;
 
     public float cooldown;
 
@@ -23,7 +25,9 @@ public class MinionUpdate extends Action {
 
         try {
             atk = minionJson.getInt("atk");
+            maxATK = minionJson.getInt("max_atk");
             hp = minionJson.getInt("hp");
+            maxHP = minionJson.getInt("max_hp");
 
             cooldown = (float) minionJson.getDouble("cooldown");
 
@@ -34,3 +38,4 @@ public class MinionUpdate extends Action {
         }
     }
 }
+
