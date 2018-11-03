@@ -285,6 +285,8 @@ function initPlayer(socket, id) {
     player.deck = [];
     player.hand = [];
 
+    //player character
+
     player.hp = 30;
     player.max_hp = 30;
 
