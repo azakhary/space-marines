@@ -12,6 +12,7 @@ import com.rockbite.hackathon.sm.communications.commands.MinionAttack;
 import com.rockbite.hackathon.sm.communications.commands.PlayCard;
 import com.rockbite.hackathon.sm.components.CardComponent;
 import com.rockbite.hackathon.sm.components.GameComponent;
+import com.rockbite.hackathon.sm.components.HeroComponent;
 import com.rockbite.hackathon.sm.components.MinionComponent;
 import com.rockbite.hackathon.sm.components.render.TransformComponent;
 import com.rockbite.hackathon.sm.systems.CardSystem;
@@ -23,6 +24,7 @@ public class InputController {
 
     private Family cardTransforms = Family.all(TransformComponent.class, CardComponent.class).get();
     private Family minionTransforms = Family.all(TransformComponent.class, MinionComponent.class).get();
+    private Family heroFamily = Family.all(TransformComponent.class, HeroComponent.class).get();
 
     private ComponentMapper<TransformComponent> tcMapper = ComponentMapper.getFor(TransformComponent.class);
     private ComponentMapper<CardComponent> ccMapper = ComponentMapper.getFor(CardComponent.class);
@@ -84,12 +86,20 @@ public class InputController {
                             tc.offsetY = 0;
                         }
                     } else if(draggingEntity.getComponent(MinionComponent.class) != null) {
-                        // it's minion
+                        // it's minion (that was dropped, but on what?)
                         Entity collidedMinion = getCollisionWithMinion(minionTransforms, currTouch, draggingEntity);
-                        if(collidedMinion != null) {
-                            System.out.println("CONTACT!");
-                            playMinion(collidedMinion);
+                        Entity collidedHero = getCollisionWithHero();
 
+
+                        if(collidedMinion != null) {
+                            System.out.println("Targeted a Minion");
+                            playMinion(collidedMinion, false);
+
+                            tc.offsetX = 0;
+                            tc.offsetY = 0;
+                        } else if(collidedHero != null) {
+                            System.out.println("Targeted a HERO");
+                            playMinion(collidedHero, true);
                             tc.offsetX = 0;
                             tc.offsetY = 0;
                         } else {
@@ -105,6 +115,7 @@ public class InputController {
         }
     }
 
+
     private void playCard() {
         //play it
         CardComponent cc = ccMapper.get(draggingEntity);
@@ -119,12 +130,25 @@ public class InputController {
         Comm.get().gameLogic.getEngine().getSystem(CardSystem.class).shiftSlots(playCard.getCardComponent().playerId, slot);
     }
 
-    private void playMinion(Entity targetEntity) {
-        MinionComponent mc = mcMapper.get(draggingEntity);
-        MinionAttack minionAttack = Comm.get().getCommand(MinionAttack.class);
-        minionAttack.fromSlot = mc.slot;
-        minionAttack.targetSlot = targetEntity.getComponent(MinionComponent.class).slot;
-        Comm.get().executeCommand(minionAttack);
+    private void playMinion(Entity targetEntity, boolean isHero) {
+        if(!isHero) {
+            // is minion
+            MinionComponent mc = mcMapper.get(draggingEntity);
+            MinionAttack minionAttack = Comm.get().getCommand(MinionAttack.class);
+            minionAttack.fromSlot = mc.slot;
+            minionAttack.isHero = false;
+            minionAttack.targetSlot = targetEntity.getComponent(MinionComponent.class).slot;
+            Comm.get().executeCommand(minionAttack);
+        } else {
+            // is hero
+            MinionComponent mc = mcMapper.get(draggingEntity);
+            HeroComponent hero = targetEntity.getComponent(HeroComponent.class);
+            MinionAttack minionAttack = Comm.get().getCommand(MinionAttack.class);
+            minionAttack.fromSlot = mc.slot;
+            minionAttack.targetSlot = 0;
+            minionAttack.isHero = true;
+            Comm.get().executeCommand(minionAttack);
+        }
     }
 
     private void setTouchPos(Vector2 vector) {
@@ -173,6 +197,31 @@ public class InputController {
             if(tmp.x >= tc.x+tc.offsetX && tmp.y+tc.offsetY > tc.y && tmp.x <= tc.x+tc.offsetX+tc.width && tmp.y <= tc.y+tc.offsetY+tc.height) {
                 // we've got a hit
                 return entities.get(i);
+            }
+        }
+
+        return null;
+    }
+
+
+    private Entity getCollisionWithHero() {
+        float x = Gdx.input.getX();
+        float y = Gdx.input.getY();
+
+        Viewport viewport = Comm.get().gameLogic.getEngine().getSystem(RenderSystem.class).viewport;
+
+        viewport.unproject(tmp.set(x, y));
+
+        ImmutableArray<Entity> entities = Comm.get().gameLogic.getEngine().getEntitiesFor(heroFamily);
+
+        for (int i = 0; i < entities.size(); ++i) {
+            HeroComponent hero = entities.get(i).getComponent(HeroComponent.class);
+            if(hero.user_id == Comm.get().gameLogic.opponentUserId) {
+                TransformComponent tc = tcMapper.get(entities.get(i));
+                if(tmp.x >= tc.x+tc.offsetX && tmp.y+tc.offsetY > tc.y && tmp.x <= tc.x+tc.offsetX+tc.width && tmp.y <= tc.y+tc.offsetY+tc.height) {
+                    // we've got a hit
+                    return entities.get(i);
+                }
             }
         }
 

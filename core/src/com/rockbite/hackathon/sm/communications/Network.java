@@ -46,7 +46,9 @@ public class Network {
                     JSONObject obj = (JSONObject)args[0];
                     try {
                         int user_id = obj.getInt("user_id");
+                        float mana_speed = (float) obj.getDouble("mana_speed");
                         System.out.println("room created with opponent id: " + user_id);
+                        Comm.get().gameLogic.MANA_SPEED = mana_speed;
                         Comm.get().gameLogic.opponentUserId = user_id;
                         Comm.get().gameLogic.initGameEntities();
                     } catch (JSONException e) {
@@ -107,6 +109,7 @@ public class Network {
                 @Override
                 public void call(Object... args) {
                     JSONObject obj = (JSONObject)args[0];
+                    System.out.println("hero sync response is received");
                     try {
                         int user_id = obj.getInt("user_id");
                         HeroSync action = Comm.get().getAction(HeroSync.class);

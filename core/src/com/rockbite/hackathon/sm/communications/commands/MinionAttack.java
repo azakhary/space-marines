@@ -12,6 +12,7 @@ public class MinionAttack extends Command {
     public int fromSlot;
 
     public int targetSlot;
+    public boolean isHero;
 
     @Override
     public void execute() {
@@ -20,6 +21,8 @@ public class MinionAttack extends Command {
         try {
             payload.put("from_slot", fromSlot);
             payload.put("target_slot", targetSlot);
+            payload.put("is_target_hero", isHero);
+            System.out.println("minion performed an attack to server");
             Comm.get().gameLogic.getNetwork().getSocket().emit("minion_attack", payload);
         } catch (JSONException e) {
             e.printStackTrace();
