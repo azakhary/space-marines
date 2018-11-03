@@ -209,8 +209,8 @@ public class RenderSystem extends EntitySystem {
             // render current player deck
             float off = 10f;
             batch.setColor(transform.tint);
-            batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(minion.id + "-card"), transform.x + transform.offsetX+off, transform.y+transform.offsetY+off, transform.width-off-10, transform.height-off-10);
-            batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-board"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width, transform.height);
+            batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(minion.id + "-card"), transform.x + transform.offsetX+off, transform.y+transform.offsetY+off, (transform.width-off-10)/2f, (transform.height-off-10)/2f, transform.width-off-10, transform.height-off-10, transform.scaleX, transform.scaleY, 0f);
+            batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-board"), transform.x + transform.offsetX, transform.y+transform.offsetY,  transform.width/2f, transform.height/2f, transform.width, transform.height, transform.scaleX, transform.scaleY, 0f);
             batch.setColor(Color.WHITE);
 
             Label label  = Comm.get().gameLogic.getAssets().label;
@@ -222,6 +222,15 @@ public class RenderSystem extends EntitySystem {
             label.setText(minion.hp + "");
             label.setPosition(transform.x + transform.offsetX + 98f, transform.y+transform.offsetY);
             label.draw(batch, 1f);
+
+            // cooldown
+            if(minion.cooldown > 0) {
+                label  = Comm.get().gameLogic.getAssets().label;
+                String cld = ((int)Math.ceil(minion.cooldown))+"";
+                label.setText(cld + "");
+                label.setPosition(transform.x + transform.offsetX + 50f, transform.y+transform.offsetY + 70);
+                label.draw(batch, 1f);
+            }
         }
     }
 

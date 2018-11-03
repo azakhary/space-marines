@@ -35,4 +35,15 @@ public class HeroSystem extends EntitySystem {
             }
         }
     }
+
+    public Entity getFor(int uniqueUserId) {
+        ImmutableArray<Entity> heroes = getEngine().getEntitiesFor(Family.all(HeroComponent.class).get());
+        for (int i = 0; i < heroes.size(); ++i) {
+            HeroComponent hero = herMapper.get(heroes.get(i));
+            if (hero.user_id == uniqueUserId) {
+                return heroes.get(i);
+            }
+        }
+        return null;
+    }
 }

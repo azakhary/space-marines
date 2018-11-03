@@ -15,6 +15,7 @@ public class CardComponent implements Component {
 
     public String type;
     public String title;
+    public String description;
     public int cost;
     public Minion minion;
     public Spell spell;
@@ -26,6 +27,7 @@ public class CardComponent implements Component {
             id = cardJson.getString("id");
             type = cardJson.getString("type");
             title = cardJson.getString("title");
+            description = cardJson.getString("description");
 
             cost = cardJson.getInt("cost");
 

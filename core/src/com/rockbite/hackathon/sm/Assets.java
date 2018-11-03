@@ -18,6 +18,9 @@ public class Assets {
 
     public Label label_small;
 
+    public Label.LabelStyle labelStyle;
+    public Label.LabelStyle labelStyleSmall;
+
     public Assets() {
         atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"));
 
@@ -38,5 +41,9 @@ public class Assets {
         label = new Label("aaa", new Label.LabelStyle(font, Color.WHITE));
 
         label_small = new Label("aaa", new Label.LabelStyle(font_small, Color.WHITE));
+
+
+        labelStyle    =    new Label.LabelStyle(font, Color.WHITE);
+        labelStyleSmall    =    new Label.LabelStyle(font_small, Color.WHITE);
     }
 }

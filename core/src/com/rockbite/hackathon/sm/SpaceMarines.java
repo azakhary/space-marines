@@ -20,11 +20,14 @@ public class SpaceMarines extends ApplicationAdapter {
 	@Override
 	public void create () {
 
+		GameStage stage = new GameStage();
+
 		engine = new PooledEngine();
 
         inputController = new InputController();
 
 		gameLogic = new GameLogic(engine);
+		gameLogic.stage = stage;
 		Assets assets = new Assets();
 
 		RenderSystem renderSystem = new RenderSystem();
@@ -32,6 +35,7 @@ public class SpaceMarines extends ApplicationAdapter {
 		Comm.injectGameLogic(gameLogic);
 		gameLogic.injectAssets(assets);
 
+		stage.init();
 		gameLogic.initGameSession(); // TODO: this has to be done at other point when integrated with backend API
 	}
 
@@ -41,6 +45,9 @@ public class SpaceMarines extends ApplicationAdapter {
 		engine.update(Gdx.graphics.getDeltaTime());
 
         inputController.update(Gdx.graphics.getDeltaTime());
+
+		gameLogic.stage.act();
+		gameLogic.stage.draw();
 	}
 	
 	@Override
@@ -48,5 +55,7 @@ public class SpaceMarines extends ApplicationAdapter {
 		engine.removeAllEntities();
 		engine.removeSystem(engine.getSystem(RenderSystem.class));
 		gameLogic.dispose();
+
+		Comm.dispose();
 	}
 }

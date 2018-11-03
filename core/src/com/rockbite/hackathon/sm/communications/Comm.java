@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class Comm {
 
-    private static final Comm instance = new Comm();
+    private static Comm instance = new Comm();
 
     private HashMap<Class<? extends Action>, ObjectSet<Observer>> observerMap;
 
@@ -86,5 +86,13 @@ public class Comm {
 
     public static void injectGameLogic(GameLogic gameLogic) {
         get().gameLogic = gameLogic;
+    }
+
+    public static void dispose() {
+        get().terminate();
+    }
+
+    public void terminate() {
+        instance = null;
     }
 }

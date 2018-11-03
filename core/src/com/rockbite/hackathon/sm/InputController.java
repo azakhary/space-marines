@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.rockbite.hackathon.sm.communications.Comm;
 import com.rockbite.hackathon.sm.communications.commands.MinionAttack;
@@ -36,12 +37,20 @@ public class InputController {
 
     private Entity draggingEntity = null;
 
+    private boolean dialogOpened = false;
+
 
     public void update(double deltaTime) {
         int currPlayerId = Comm.get().gameLogic.uniqueUserId;
         int opponentPlayerId = Comm.get().gameLogic.opponentUserId;
 
         if(Gdx.input.isTouched() && !wasTouchDown) {
+
+            if(dialogOpened) {
+                Comm.get().gameLogic.stage.hideCardDiallog();
+                dialogOpened = false;
+            }
+
             setTouchPos(firstTouch);
             // check cards
             Entity card = getCollision(cardTransforms);
@@ -84,6 +93,14 @@ public class InputController {
                         } else {
                             tc.offsetX = 0;
                             tc.offsetY = 0;
+
+                            // if it was just A CLICK
+                            if(Math.sqrt((currTouch.x-firstTouch.x)*(currTouch.x-firstTouch.x)+(currTouch.y-firstTouch.y)*(currTouch.y-firstTouch.y)) < 10) {
+                                System.out.println("card clicked");
+                                Comm.get().gameLogic.stage.showCardDiallog(cardComponent);
+                                dialogOpened = true;
+                            }
+
                         }
                     } else if(draggingEntity.getComponent(MinionComponent.class) != null) {
                         // it's minion (that was dropped, but on what?)

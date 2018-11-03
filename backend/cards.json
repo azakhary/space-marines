@@ -2,11 +2,103 @@
   {
     "id": "boris",
     "type": "minion",
-    "title": "Borislaw",
+    "title": "Borislav",
+    "description": "Dangerous redhead. Don't mess with him!",
+    "cost": 4,
+    "minion": {
+      "atk": 4,
+      "hp": 7
+    },
+    "spell": {
+    }
+  },
+  {
+    "id": "eduard",
+    "type": "minion",
+    "title": "Ed",
+    "description": "Ed is making sound wave, that makes 1 damage to all enemy minions, when played. Kinda greeting, you know...",
     "cost": 2,
     "minion": {
-      "atk": 5,
-      "hp": 7
+      "atk": 2,
+      "hp": 4
+    },
+    "spell": {
+    }
+  },
+  {
+    "id": "grachik",
+    "type": "minion",
+    "title": "FireGrachik",
+    "description": "FireGrachik is shooting fire and making  nice show and also 3 dmg to enemy hero, when is killed",
+    "cost": 2,
+    "minion": {
+      "atk": 3,
+      "hp": 3
+    },
+    "spell": {
+    }
+  },
+  {
+    "id": "patil",
+    "type": "minion",
+    "title": "NyetRusski",
+    "description": "NyetRusski is giving a shield to Hero from enemys attack (+5) when played",
+    "cost": 1,
+    "minion": {
+      "atk": 2,
+      "hp": 3
+    },
+    "spell": {
+    }
+  },
+  {
+    "id": "gayush",
+    "type": "minion",
+    "title": "Gayush",
+    "description": "Gayush is taking a care of minion team, healing randomly one of them +1 every turn, starting from being played",
+    "cost": 1,
+    "minion": {
+      "atk": 1,
+      "hp": 2
+    },
+    "spell": {
+    }
+  },
+  {
+    "id": "gev",
+    "type": "minion",
+    "title": "Gev",
+    "description": "When Gev say 'no' - obey. When played, Gev is canceling any enemy minion spell (active or being called after deth)",
+    "cost": 2,
+    "minion": {
+      "atk": 3,
+      "hp": 3
+    },
+    "spell": {
+    }
+  },
+  {
+    "id": "avik",
+    "type": "minion",
+    "title": "Avik",
+    "description": "Avik is increasing team spirit! Minion, standing on his left gain +1 to atk, while SantAvik is on the board",
+    "cost": 2,
+    "minion": {
+      "atk": 3,
+      "hp": 4
+    },
+    "spell": {
+    }
+  },
+  {
+    "id": "ach",
+    "type": "minion",
+    "title": "MasterAch",
+    "description": "When played MasterAch summon 2 minions (nane-card and dave-card, hp 1, atk 1)",
+    "cost": 2,
+    "minion": {
+      "atk": 2,
+      "hp": 3
     },
     "spell": {
     }
@@ -14,14 +106,14 @@
   {
     "id": "hayk",
     "type": "minion",
-    "title": "Dravasek",
-    "cost": 1,
+    "title": "Kirakos",
+    "description": "Has 50% probability to lose cool down... workaholic!",
+    "cost": 3,
     "minion": {
-      "atk": 4,
-      "hp": 4
+      "atk": 3,
+      "hp": 5
     },
     "spell": {
-
     }
   }
 ]

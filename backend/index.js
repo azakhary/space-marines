@@ -12,7 +12,7 @@ var roomIdInc = 0;
 var connectionRooms = {};
 var currentConnections = {};
 
-const MANA_SPEED = 0.1;
+const MANA_SPEED = 1.1;
 const MINON_COOLDOWN = 5;
 
 /*
@@ -86,8 +86,6 @@ function join(socket, data) {
         roomIdInc++;
         socket.join(room_id);
         player.socket.join(room_id);
-        socket.emit("game_started", {user_id:player.id, room_id:room_id, mana_speed:MANA_SPEED});
-        player.socket.emit("game_started", {user_id:client_id, room_id:room_id, mana_speed:MANA_SPEED});
         console.log(room_id);
 
         currentConnections[socket.id]['room_id'] = room_id;
@@ -98,6 +96,12 @@ function join(socket, data) {
 
         connectionRooms[room_id] = [playerOne, playerTwo];
         console.log(connectionRooms);
+
+        var plrOne = {hero: playerOne.hero, hp: playerOne.hp, max_hp: playerOne.max_hp};
+        var plrTwo = {hero: playerTwo.hero, hp: playerTwo.hp, max_hp: playerTwo.max_hp};
+
+        socket.emit("game_started", {user_id:player.id, room_id:room_id, mana_speed:MANA_SPEED, cooldown: MINON_COOLDOWN, player_data: plrTwo, opponent_data: plrOne});
+        player.socket.emit("game_started", {user_id:client_id, room_id:room_id, mana_speed:MANA_SPEED, cooldown: MINON_COOLDOWN, player_data: plrOne, opponent_data: plrTwo});
     }
     else {
         players.push({socket:socket, id:client_id});
@@ -180,6 +184,11 @@ function minionAttackCommand(socket, data) {
             toPlayer.hp = 0;
         }
 
+        // initiate attack anim
+        fromPlayer.socket.emit("minion_attack_animation", {user_id:fromPlayer.id, from_slot_id: from_slot, to_slot_id: target_slot, target_hero: true});
+        toPlayer.socket.emit("minion_attack_animation", {user_id:fromPlayer.id, from_slot_id: from_slot, to_slot_id: target_slot, target_hero: true});
+
+
         fromPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
         toPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
 
@@ -203,8 +212,12 @@ function minionAttackCommand(socket, data) {
             fromPlayer.board[from_slot].destroyed = true;
         }
 
-    toPlayer.socket.emit("minion_update", {user_id:toPlayer.id, slot_id: target_slot, minion: toPlayer.board[target_slot]});
-    toPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
+        // initiate attack anim
+        fromPlayer.socket.emit("minion_attack_animation", {user_id:fromPlayer.id, from_slot_id: from_slot, to_slot_id: target_slot, target_hero: false});
+        toPlayer.socket.emit("minion_attack_animation", {user_id:fromPlayer.id, from_slot_id: from_slot, to_slot_id: target_slot, target_hero: false});
+
+        toPlayer.socket.emit("minion_update", {user_id:toPlayer.id, slot_id: target_slot, minion: toPlayer.board[target_slot]});
+        toPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
 
         fromPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
         fromPlayer.socket.emit("minion_update", {user_id:toPlayer.id, slot_id: target_slot, minion: toPlayer.board[target_slot]});
@@ -242,6 +255,7 @@ function Card() {
     this.id = "";
     this.type = 'minion';
     this.title = "";
+    this.description = "";
     this.cost = 0;
     this.minion = {};
     this.spell = {};
@@ -295,6 +309,7 @@ function createCard(id) {
     card.id = id;
     card.type = obj.type;
     card.title = obj.title;
+    card.description = obj.description;
     card.cost = obj.cost;
     card.minion = obj.minion;
     card.spell = obj.spell;
@@ -317,7 +332,6 @@ function initPlayer(socket, id) {
     } else {
         player.hero = "two";
     }
-
 
     player.hp = 30;
     player.max_hp = 30;
@@ -391,8 +405,10 @@ function getMana(player, curr) {
     if(mana > player.maxMana) {
         mana = player.maxMana;
     }
+    /*
     else {
         mana = Math.floor(mana);
-    }
+    }*/
+
     return mana;
 }

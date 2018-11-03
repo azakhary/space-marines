@@ -3,6 +3,7 @@ package com.rockbite.hackathon.sm.communications;
 import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
 import com.rockbite.hackathon.sm.communications.actions.HeroSync;
+import com.rockbite.hackathon.sm.communications.actions.MinionAttackAnim;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
 import com.rockbite.hackathon.sm.components.CardComponent;
 
@@ -47,10 +48,12 @@ public class Network {
                     try {
                         int user_id = obj.getInt("user_id");
                         float mana_speed = (float) obj.getDouble("mana_speed");
+                        float cooldown = (float) obj.getDouble("cooldown");
                         System.out.println("room created with opponent id: " + user_id);
                         Comm.get().gameLogic.MANA_SPEED = mana_speed;
+                        Comm.get().gameLogic.MAX_COOLDOWN = cooldown;
                         Comm.get().gameLogic.opponentUserId = user_id;
-                        Comm.get().gameLogic.initGameEntities();
+                        Comm.get().gameLogic.initGameEntities(obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -80,6 +83,22 @@ public class Network {
                         int user_id = obj.getInt("user_id");
                         JSONObject minionJson = obj.getJSONObject("minion");
                         Comm.get().gameLogic.summonMinion(user_id, minionJson);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }).on("minion_attack_animation", new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {
+                    JSONObject obj = (JSONObject)args[0];
+                    try {
+                        int user_id = obj.getInt("user_id");
+
+                        MinionAttackAnim action = Comm.get().getAction(MinionAttackAnim.class);
+                        action.set(user_id, obj);
+                        Comm.get().sendAction(action);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
