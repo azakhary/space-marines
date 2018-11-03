@@ -39,39 +39,42 @@ for(var i = 0; i < cards.length; i++) {
 
 
 function initSocketIO() {
-    io.on('connection', function (socket) {
+   io.on('connection', function (socket) {
 
-        console.log("Client connected");
+       console.log("Client connected");
 
-        currentConnections[socket.id] = {socket: socket};
+       currentConnections[socket.id] = {socket: socket};
 
-        socket.on('join', function(data) {
-            console.log(data);
-            console.log(socket.id);
-            join(socket, data);
-        });
-        socket.on('send_emoji', function (data) {
-            console.log(data);
-            sendEmoji(socket, data);
-        });
-        socket.on('play_card', function (data) {
-            console.log(data);
-            playCard(socket, data);
-        });
-        socket.on('minion_attack', function (data) {
-            minionAttackCommand(socket, data);
-        });
-        socket.on('disconnect', function() {
-            room_id = currentConnections[socket.id]['room_id'];
-            if(room_id) {
-                connectionRooms[room_id].forEach(function (cl) {
-                   cl.disconnect();
-                });
-                delete connectionRooms[room_id];
-            }
-            delete currentConnections[socket.id];
-        });
-    });
+       socket.on('join', function(data) {
+           console.log(data);
+           console.log(socket.id);
+           join(socket, data);
+       });
+       socket.on('send_emoji', function (data) {
+           console.log(data);
+           sendEmoji(socket, data);
+       });
+       socket.on('play_card', function (data) {
+           console.log(data);
+           playCard(socket, data);
+       });
+       socket.on('minion_attack', function (data) {
+           minionAttackCommand(socket, data);
+       });
+       socket.on('disconnect', function() {
+           var room_id = currentConnections[socket.id]['room_id'];
+           if(room_id != undefined && room_id != null) {
+               connectionRooms[room_id].forEach(function (player) {
+                   if(player.socket.id != socket.id) {
+                       players.push({socket:player.socket, id:player.id});
+                   }
+                   player.socket.leave(room_id);
+               });
+               delete connectionRooms[room_id];
+           }
+           delete currentConnections[socket.id];
+       });
+   });
 }
 
 function join(socket, data) {
@@ -230,7 +233,7 @@ function spendMana(room, player, card) {
         mana = Math.floor(mana);
     }
 
-    if(mana > card.cost) {
+    if(mana >= card.cost) {
         mana -= card.cost;
 
         player.mana = mana;

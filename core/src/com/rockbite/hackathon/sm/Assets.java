@@ -13,7 +13,10 @@ public class Assets {
     public TextureAtlas atlas;
 
     public BitmapFont font;
+    public BitmapFont font_small;
     public Label label;
+
+    public Label label_small;
 
     public Assets() {
         atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"));
@@ -24,8 +27,16 @@ public class Assets {
         parameter.borderColor = Color.BLACK;
         parameter.borderWidth = 4f;
         font = generator.generateFont(parameter); // font size 12 pixels
+
+        parameter.size = 16;
+        parameter.borderColor = Color.BLACK;
+        parameter.borderWidth = 2f;
+        font_small = generator.generateFont(parameter); // font size 12 pixels
+
         generator.dispose(); // don't forget to dispose to avoid memory leaks!
 
         label = new Label("aaa", new Label.LabelStyle(font, Color.WHITE));
+
+        label_small = new Label("aaa", new Label.LabelStyle(font_small, Color.WHITE));
     }
 }

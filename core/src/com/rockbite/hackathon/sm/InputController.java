@@ -11,6 +11,7 @@ import com.rockbite.hackathon.sm.communications.Comm;
 import com.rockbite.hackathon.sm.communications.commands.MinionAttack;
 import com.rockbite.hackathon.sm.communications.commands.PlayCard;
 import com.rockbite.hackathon.sm.components.CardComponent;
+import com.rockbite.hackathon.sm.components.GameComponent;
 import com.rockbite.hackathon.sm.components.MinionComponent;
 import com.rockbite.hackathon.sm.components.render.TransformComponent;
 import com.rockbite.hackathon.sm.systems.CardSystem;
@@ -71,9 +72,12 @@ public class InputController {
 
                     System.out.println("DROP");
                     // is this card or minion
-                    if(draggingEntity.getComponent(CardComponent.class) != null) {
+                    CardComponent cardComponent = draggingEntity.getComponent(CardComponent.class);
+                    if(cardComponent != null) {
                         // it's card
-                        if(tc.y + tc.offsetY > -230f) {
+                        GameComponent game =Comm.get().gameLogic.gameEntity.getComponent(GameComponent.class);
+                        int mana = (int) Math.floor(game.mana);
+                        if(tc.y + tc.offsetY > -230f && cardComponent.cost <= mana) {
                             playCard();
                         } else {
                             tc.offsetX = 0;

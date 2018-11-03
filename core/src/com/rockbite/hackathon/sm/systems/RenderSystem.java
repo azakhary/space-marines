@@ -87,7 +87,7 @@ public class RenderSystem extends EntitySystem {
 
     @Override
     public void update (float deltaTime) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClearColor(57f/255f, 57f/255f, 57f/255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.setProjectionMatrix(viewport.getCamera().combined);
@@ -185,6 +185,18 @@ public class RenderSystem extends EntitySystem {
                 float off = 10f;
                 batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion(card.id + "-card"), transform.x + transform.offsetX+off, transform.y+transform.offsetY+off, transform.width-off-10, transform.height-off-10);
                 batch.draw(Comm.get().gameLogic.getAssets().atlas.findRegion("card-hand"), transform.x + transform.offsetX, transform.y+transform.offsetY, transform.width, transform.height);
+
+                // render title
+                Label label = Comm.get().gameLogic.getAssets().label_small;
+                label.setText(card.title);
+                label.setPosition(transform.x + transform.offsetX + transform.width/2f - label.getWidth()/2f - 22f, transform.y+105 + transform.offsetY);
+                label.draw(batch, 1f);
+
+                // render cost
+                label = Comm.get().gameLogic.getAssets().label;
+                label.setText(card.cost+"");
+                label.setPosition(transform.x+45 + transform.offsetX, transform.y+2 + transform.offsetY);
+                label.draw(batch, 1f);
             }
         }
     }
