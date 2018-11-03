@@ -34,6 +34,11 @@ import com.rockbite.hackathon.sm.systems.SpellSystem;
 import org.json.JSONObject;
 
 public class GameLogic implements Observer  {
+
+    public static float MANA_SPEED = 0.1f;
+
+
+
     private PooledEngine engine;
 
     public Entity gameEntity;

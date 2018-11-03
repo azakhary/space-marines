@@ -177,31 +177,43 @@ function minionAttackCommand(socket, data) {
 
     console.log("fromCooldown:", fromCooldown, "toCooldown:", toCooldown);
 
-    if(fromPlayer.board[target_slot].cooldown)
+    if(data.is_target_hero == true) {
+        // hero being attacked
+        toPlayer.hp -= fromPlayer.board[from_slot].atk;
+        if(toPlayer.hp <= 0) {
+            toPlayer.hp = 0;
+        }
 
-    toPlayer.board[target_slot].hp -= fromPlayer.board[from_slot].atk;
-    fromPlayer.board[from_slot].hp -= toPlayer.board[target_slot].atk;
+        console.log("new hp: " + toPlayer.hp);
+        syncHero(toPlayer, toPlayer);
+        syncHero(fromPlayer, toPlayer);
 
-    if(toPlayer.board[target_slot].hp <= 0) {
-        toPlayer.board[target_slot].destroyed = true;
-    }
-    if(fromPlayer.board[from_slot].hp <= 0) {
-        fromPlayer.board[from_slot].destroyed = true;
-    }
+    } else {
+        // minion being attacked
+        toPlayer.board[target_slot].hp -= fromPlayer.board[from_slot].atk;
+        fromPlayer.board[from_slot].hp -= toPlayer.board[target_slot].atk;
 
+        if(toPlayer.board[target_slot].hp <= 0) {
+            toPlayer.board[target_slot].destroyed = true;
+        }
+        if(fromPlayer.board[from_slot].hp <= 0) {
+            fromPlayer.board[from_slot].destroyed = true;
+        }
 
     toPlayer.socket.emit("minion_update", {user_id:toPlayer.id, slot_id: target_slot, minion: toPlayer.board[target_slot]});
     toPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
 
-    fromPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
-    fromPlayer.socket.emit("minion_update", {user_id:toPlayer.id, slot_id: target_slot, minion: toPlayer.board[target_slot]});
+        fromPlayer.socket.emit("minion_update", {user_id:fromPlayer.id, slot_id: from_slot, minion: fromPlayer.board[from_slot]});
+        fromPlayer.socket.emit("minion_update", {user_id:toPlayer.id, slot_id: target_slot, minion: toPlayer.board[target_slot]});
 
-    if(toPlayer.board[target_slot].destroyed == true) {
-        toPlayer.board.splice(target_slot, target_slot + 1);
+        if(toPlayer.board[target_slot].destroyed == true) {
+            toPlayer.board.splice(target_slot, target_slot + 1);
+        }
+        if(fromPlayer.board[from_slot].destroyed == true) {
+            fromPlayer.board.splice(from_slot, from_slot + 1);
+        }
     }
-    if(fromPlayer.board[from_slot].destroyed == true) {
-        fromPlayer.board.splice(from_slot, from_slot + 1);
-    }
+
 }
 
 function getMinionCooldown(minion) {
@@ -277,7 +289,7 @@ function spendMana(room, player, card) {
         player.mana = mana;
         player.lastSpentTime = curr;
 
-        syncHero(player);
+        syncHero(player, player);
 
         return true;
     }
@@ -307,6 +319,9 @@ function initPlayer(socket, id) {
     // creating a deck of 30
     player.deck = [];
     player.hand = [];
+
+    player.hp = 30;
+    player.max_hp = 30;
 
     player.mana = 0;
     player.maxMana = 10;
@@ -358,6 +373,8 @@ function drawCard(player) {
     player.socket.emit("draw_card", {user_id:player.id, card: crd});
 }
 
-function syncHero(player) {
-    player.socket.emit("hero_sync", {user_id:player.id, 'mana': player.mana, 'hp': 20, 'max_hp': 30});
+function syncHero(sendToPlayer, player) {
+    var data = {user_id:player.id, 'mana': player.mana, 'hp': player.hp, 'max_hp': player.max_hp};
+    console.log("hero sync: " + data);
+    sendToPlayer.socket.emit("hero_sync", data);
 }

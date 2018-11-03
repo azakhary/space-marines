@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.rockbite.hackathon.sm.communications.Comm;
 import com.rockbite.hackathon.sm.components.GameComponent;
 import com.rockbite.hackathon.sm.components.render.DrawableComponent;
 import com.rockbite.hackathon.sm.components.render.TransformComponent;
@@ -30,7 +31,7 @@ public class GameSystem extends EntitySystem {
 
             GameComponent gameComponent = mainComponentMapper.get(entities.get(i));
 
-            gameComponent.mana += deltaTime * 0.1f;
+            gameComponent.mana += deltaTime * Comm.get().gameLogic.MANA_SPEED;
 
             if(gameComponent.mana > gameComponent.maxMana) {
                 gameComponent.mana = gameComponent.maxMana;
