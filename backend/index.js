@@ -163,19 +163,14 @@ function minionAttackCommand(socket, data) {
     });
 
     var fromCooldown = getMinionCooldown(fromPlayer.board[target_slot]);
-    var toCooldown = getMinionCooldown(toPlayer.board[target_slot]);
+
     if(fromCooldown > 0) {
         // Can't attack should not get there
         console.error("Error cannot attack, minion is still on it's cooldown, Client should check, shoud not get here");
         return;
     }
-
-    var curr = new Date().getTime();
     fromPlayer.board[target_slot].cooldown = MINON_COOLDOWN; // Reset attackers cooldown
-    toPlayer.board[target_slot].cooldown = toCooldown;
-    fromPlayer.board[target_slot].time = curr;
-
-    console.log("fromCooldown:", fromCooldown, "toCooldown:", toCooldown);
+    fromPlayer.board[target_slot].time = new Date().getTime();
 
     if(data.is_target_hero == true) {
         // hero being attacked
@@ -190,6 +185,10 @@ function minionAttackCommand(socket, data) {
 
     } else {
         // minion being attacked
+
+        var toCooldown = getMinionCooldown(toPlayer.board[target_slot]);
+        toPlayer.board[target_slot].cooldown = toCooldown;
+
         toPlayer.board[target_slot].hp -= fromPlayer.board[from_slot].atk;
         fromPlayer.board[from_slot].hp -= toPlayer.board[target_slot].atk;
 
