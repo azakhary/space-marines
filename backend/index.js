@@ -169,6 +169,7 @@ function minionAttackCommand(socket, data) {
         console.error("Error cannot attack, minion is still on it's cooldown, Client should check, shoud not get here");
         return;
     }
+
     fromPlayer.board[target_slot].cooldown = MINON_COOLDOWN; // Reset attackers cooldown
     fromPlayer.board[target_slot].time = new Date().getTime();
 

@@ -13,6 +13,8 @@ public class MinionComponent implements Component {
     public int atk;
     public int hp;
 
+    public float cooldown;
+
     public int slot;
 
     public void set(int user_id, JSONObject minionJson) {
@@ -22,6 +24,8 @@ public class MinionComponent implements Component {
             id = minionJson.getString("id");
             atk = minionJson.getInt("atk");
             hp = minionJson.getInt("hp");
+
+            cooldown = (float) minionJson.getDouble("cooldown");
 
             slot = minionJson.getInt("slot");
 

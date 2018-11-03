@@ -13,6 +13,8 @@ public class MinionUpdate extends Action {
     public int atk;
     public int hp;
 
+    public float cooldown;
+
     public boolean destroyed;
 
     public void set(int user_id, int slot_id, JSONObject minionJson) {
@@ -22,6 +24,8 @@ public class MinionUpdate extends Action {
         try {
             atk = minionJson.getInt("atk");
             hp = minionJson.getInt("hp");
+
+            cooldown = (float) minionJson.getDouble("cooldown");
 
             destroyed = minionJson.getBoolean("destroyed");
 

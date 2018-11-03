@@ -95,6 +95,7 @@ public class MinionSystem extends EntitySystem {
                 if(minionUpdate.destroyed != true) {
                     minion.atk = minionUpdate.atk;
                     minion.hp = minionUpdate.hp;
+                    minion.cooldown = minionUpdate.cooldown;
                 } else {
                     getEngine().removeEntity(entities.get(i));
                     shiftSlots(minionUpdate.user_id, minionUpdate.slot_id);
