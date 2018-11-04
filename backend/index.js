@@ -54,7 +54,7 @@ cardMap["eduard"].on_board_change = function(board, thisMinion, isSameBoard, pla
     if(!isSameBoard) return;
     for(key in minionOwner.board) {
         var minion = board[key];
-        if(minion.card.id == "gayush") {
+        if(minion.card.id == "hayk") {
 
             // gain +2 atk
             if(thisMinion.buffed != true) {

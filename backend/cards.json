@@ -17,7 +17,7 @@
     "id": "eduard",
     "type": "minion",
     "title": "Eduard",
-    "description": "Has +2 attack if Gayush is around",
+    "description": "Has +2 attack if Hayk is around",
     "cost": 4,
     "deck": true,
     "minion": {
