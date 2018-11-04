@@ -5,8 +5,10 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
+import com.rockbite.hackathon.sm.communications.actions.GameStartedAction;
 import com.rockbite.hackathon.sm.communications.actions.HandUpdate;
 import com.rockbite.hackathon.sm.communications.actions.HeroSync;
+import com.rockbite.hackathon.sm.communications.actions.InitDeckAction;
 import com.rockbite.hackathon.sm.communications.actions.MinionAttackAnim;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
 import com.rockbite.hackathon.sm.communications.actions.SummonMinion;
@@ -30,6 +32,8 @@ public class ActionPool {
         register(MinionAttackAnim.class);
         register(SummonMinion.class);
         register(HandUpdate.class);
+        register(GameStartedAction.class);
+        register(InitDeckAction.class);
     }
 
     private <T extends Action> void register(final Class<T> clazz) {

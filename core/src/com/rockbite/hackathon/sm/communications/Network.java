@@ -3,8 +3,10 @@ package com.rockbite.hackathon.sm.communications;
 import com.badlogic.gdx.Gdx;
 import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
+import com.rockbite.hackathon.sm.communications.actions.GameStartedAction;
 import com.rockbite.hackathon.sm.communications.actions.HandUpdate;
 import com.rockbite.hackathon.sm.communications.actions.HeroSync;
+import com.rockbite.hackathon.sm.communications.actions.InitDeckAction;
 import com.rockbite.hackathon.sm.communications.actions.MinionAttackAnim;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
 import com.rockbite.hackathon.sm.communications.actions.SummonMinion;
@@ -63,10 +65,14 @@ public class Network {
                                 float mana_speed = (float) obj.getDouble("mana_speed");
                                 float cooldown = (float) obj.getDouble("cooldown");
                                 System.out.println("room created with opponent id: " + user_id);
-                                Comm.get().gameLogic.MANA_SPEED = mana_speed;
-                                Comm.get().gameLogic.MAX_COOLDOWN = cooldown;
-                                Comm.get().gameLogic.opponentUserId = user_id;
-                                Comm.get().gameLogic.initGameEntities(obj);
+
+                                GameStartedAction action = Comm.get().getAction(GameStartedAction.class);
+                                action.user_id = user_id;
+                                action.mana_speed = mana_speed;
+                                action.cooldown= cooldown;
+                                action.obj= obj;
+                                Comm.get().sendAction(action);
+
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -86,7 +92,11 @@ public class Network {
                                int user_id = obj.getInt("user_id");
                                int deck_size = obj.getInt("deck_size");
                                System.out.println("deck info received: " + deck_size + " cards");
-                               Comm.get().gameLogic.createDeck(user_id, deck_size);
+
+                               InitDeckAction action = Comm.get().getAction(InitDeckAction.class);
+                               action.user_id = user_id;
+                               action.deck_size = deck_size;
+                               Comm.get().sendAction(action);
                            } catch (JSONException e) {
                                e.printStackTrace();
                            }
@@ -211,6 +221,8 @@ public class Network {
                             try {
                                 int user_id = obj.getInt("user_id");
                                 JSONObject cardJson = obj.getJSONObject("card");
+
+                                System.out.println("draw card call recived");
 
                                 CardDrawn action = Comm.get().getAction(CardDrawn.class);
                                 CardComponent component = Comm.get().gameLogic.getEngine().createComponent(CardComponent.class);

@@ -15,8 +15,10 @@ import com.rockbite.hackathon.sm.communications.Network;
 import com.rockbite.hackathon.sm.communications.Observer;
 import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
+import com.rockbite.hackathon.sm.communications.actions.GameStartedAction;
 import com.rockbite.hackathon.sm.communications.actions.HandUpdate;
 import com.rockbite.hackathon.sm.communications.actions.HeroSync;
+import com.rockbite.hackathon.sm.communications.actions.InitDeckAction;
 import com.rockbite.hackathon.sm.communications.actions.MinionAttackAnim;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
 import com.rockbite.hackathon.sm.communications.actions.SummonMinion;
@@ -117,9 +119,7 @@ public class GameLogic implements Observer  {
         //initGameEntities();
     }
 
-    public void initGameEntities(JSONObject data) {
-        engine.removeAllEntities();
-
+    public void initHeroes(JSONObject data) {
         String pBHero = "";
         String pTHero = "";
         int pB_hp = 0, pT_hp = 0, pB_max_hp = 0, pT_max_hp = 0;
@@ -132,9 +132,19 @@ public class GameLogic implements Observer  {
 
             pB_max_hp = data.getJSONObject("player_data").getInt("max_hp");
             pT_max_hp = data.getJSONObject("opponent_data").getInt("max_hp");
+
+            players[BOTTOM_PLAYER].add(new HeroComponent(Comm.get().gameLogic.uniqueUserId, pBHero, pB_hp));
+            players[TOP_PLAYER].add(new HeroComponent(Comm.get().gameLogic.opponentUserId, pTHero, pT_hp));
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public void initGameEntities() {
+
+        System.out.println("Starting to init game entities (and remove previous ones");
+
+        engine.removeAllEntities();
 
 
         /**
@@ -148,9 +158,6 @@ public class GameLogic implements Observer  {
         players = new Entity[2];
         players[BOTTOM_PLAYER] = engine.createEntity();
         players[TOP_PLAYER] = engine.createEntity();
-
-        players[BOTTOM_PLAYER].add(new HeroComponent(Comm.get().gameLogic.uniqueUserId, pBHero, pB_hp));
-        players[TOP_PLAYER].add(new HeroComponent(Comm.get().gameLogic.opponentUserId, pTHero, pT_hp));
 
         TransformComponent tcB = engine.createComponent(TransformComponent.class);
         tcB.set(-55, -290, 115, 115*0.88f);
@@ -198,6 +205,8 @@ public class GameLogic implements Observer  {
         Comm.get().registerObserver(this, MinionAttackAnim.class);
         Comm.get().registerObserver(this, SummonMinion.class);
         Comm.get().registerObserver(this, HandUpdate.class);
+        Comm.get().registerObserver(this, GameStartedAction.class);
+        Comm.get().registerObserver(this, InitDeckAction.class);
     }
 
     @Override
@@ -219,12 +228,14 @@ public class GameLogic implements Observer  {
             TransformComponent transformComponent = engine.createComponent(TransformComponent.class);
             transformComponent.width = 100f;
             transformComponent.height = 131f;
+            transformComponent.tint.a = 1;
             cardEntity.add(transformComponent);
             engine.addEntity(cardEntity);
 
             System.out.println("draw card " + cardDrawn.getComponent().title + " to slot " + cardDrawn.getComponent().slot );
 
             transformComponent.initActorIfNotInited();
+            transformComponent.actor.clearActions();
             transformComponent.actor.addAction(
                     Actions.sequence(
                             Actions.parallel(Actions.fadeIn(0.3f), Actions.scaleTo(1.2f, 1.2f, 0.3f, Interpolation.circleOut)),
@@ -332,6 +343,27 @@ public class GameLogic implements Observer  {
                         }
                     })
             ));
+        }
+
+        if(action instanceof GameStartedAction) {
+            final GameStartedAction act = (GameStartedAction) action;
+            MANA_SPEED = act.mana_speed;
+            MAX_COOLDOWN = act.cooldown;
+            opponentUserId = act.user_id;
+
+            initHeroes(act.obj);
+
+            act.setDoneDisplaying(true);
+        }
+
+        if(action instanceof InitDeckAction) {
+            final InitDeckAction act = (InitDeckAction) action;
+
+            initGameEntities();
+
+            createDeck(act.user_id, act.deck_size);
+
+            act.setDoneDisplaying(true);
         }
     }
 
