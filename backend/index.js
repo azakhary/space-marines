@@ -291,7 +291,7 @@ function minionAttackCommand(socket, data) {
          }
     });
 
-    var fromCooldown = getMinionCooldown(fromPlayer.board[target_slot]);
+    var fromCooldown = getMinionCooldown(fromPlayer.board[from_slot]);
 
     if(fromCooldown > 0) {
         // Can't attack should not get there
