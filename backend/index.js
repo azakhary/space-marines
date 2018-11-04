@@ -12,8 +12,12 @@ var roomIdInc = 0;
 var connectionRooms = {};
 var currentConnections = {};
 
-const MANA_SPEED = 0.5;
-const MINON_COOLDOWN = 5;
+const MANA_SPEED = 0.2;
+const MINON_COOLDOWN = 10;
+const DRAW_CARD_COOLDOWN = 10;
+
+
+console.log("server started");
 
 /*
 MongoClient.connect("mongodb://localhost:27017/space-marines", function (err, db) {
@@ -159,7 +163,8 @@ function destroyMinion(thisMinion, player1, player2, minionOwner, rooms) {
     player1.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
     player2.socket.emit("minion_update", {user_id:minionOwner.id, slot_id: thisMinion.slot, minion: thisMinion});
     if(thisMinion.card.repeat && thisMinion.card.repeat.timer) clearInterval(thisMinion.card.repeat.timer);
-    minionOwner.board.splice(thisMinion.slot, thisMinion.slot + 1);
+    delete minionOwner.board[minionOwner.board.indexOf(thisMinion)];
+
     onBoardChange(rooms, thisMinion.board);
 }
 
@@ -191,13 +196,11 @@ function initSocketIO() {
            var room_id = currentConnections[socket.id]['room_id'];
            if(room_id != undefined && room_id != null && connectionRooms[room_id]) {
                connectionRooms[room_id].forEach(function (player) {
-                   if(player.socket.id != socket.id) {
-                       players.push({socket:player.socket, id:player.id});
-                   }
                    player.socket.leave(room_id);
                });
                delete connectionRooms[room_id];
            }
+           players = [];
            delete currentConnections[socket.id];
        });
    });
@@ -247,22 +250,29 @@ function sendEmoji(socket, data) {
 
 function playCard(socket, data) {
     var slotId = data.card_slot;
+
+    var targetSlot = data.target_slot;
+
     var room_id = currentConnections[socket.id]['room_id'];
 
     connectionRooms[room_id].forEach(function (player) {
          if(player.socket.id == socket.id) {
             //player that played this card
            var card = player.hand[slotId];
-           player.hand.splice(slotId, slotId+1);
 
 
            var spent = spendMana(room_id, player, card);
 
            if(spent) {
                if (card.type == "minion") {
-                   summonMinion(connectionRooms[room_id], player, card)
+                   summonMinion(connectionRooms[room_id], player, card, targetSlot);
                    //console.log("summoning the minion hohoho");
                }
+
+               // remove the card from hand
+               player.hand.splice(slotId, 1);
+               player.socket.emit("hand_update", {user_id: player.id, slot_to_remove: slotId});
+
 
                if (player.deckLock == false) {
                    tryToDraw(player)
@@ -291,7 +301,7 @@ function minionAttackCommand(socket, data) {
          }
     });
 
-    var fromCooldown = getMinionCooldown(fromPlayer.board[target_slot]);
+    var fromCooldown = getMinionCooldown(fromPlayer.board[from_slot]);
 
     if(fromCooldown > 0) {
         // Can't attack should not get there
@@ -355,11 +365,11 @@ function minionAttackCommand(socket, data) {
         }
 
         if(toPlayer.board[target_slot] && toPlayer.board[target_slot].destroyed == true) {
-            toPlayer.board.splice(target_slot, target_slot + 1);
+            delete toPlayer.board[target_slot];
             onBoardChange(connectionRooms[room_id], toPlayer.board);
         }
         if(fromPlayer.board[from_slot] && fromPlayer.board[from_slot].destroyed == true) {
-            fromPlayer.board.splice(from_slot, from_slot + 1);
+            delete fromPlayer.board[from_slot];
             onBoardChange(connectionRooms[room_id], fromPlayer.board);
         }
 
@@ -397,10 +407,37 @@ function Card() {
     this.spell = {};
 }
 
-function summonMinion(room, player, card) {
+function isSlotEmpty(board, slot) {
+    for(key in board) {
+        if(board[key].slot == slot) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function findEmptySlot(board) {
+    for(var i = 0; i < 4; i++) {
+        if(isSlotEmpty(board, i)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function getBoardMinionCount(board) {
+    var c = 0;
+    for(key in board) {
+        c++;
+    }
+
+    return c;
+}
+
+function summonMinion(room, player, card, target_slot = -1) {
      var minion = {};
 
-     if( player.board.length > 4) return;
+     if( getBoardMinionCount(player.board) > 4) return;
 
      minion.atk = card.minion.atk;
      minion.max_atk = card.minion.atk;
@@ -415,9 +452,28 @@ function summonMinion(room, player, card) {
      minion.time = new Date().getTime();
      minion.cooldown = MINON_COOLDOWN;
 
-     player.board.push(minion);
 
-     minion.slot = player.board.indexOf(minion);
+     if(target_slot >= 0) {
+         //slot was specified
+         // check if slot is empty;
+         if(isSlotEmpty(player.board, target_slot)) {
+             minion.slot = target_slot;
+         } else {
+             console.log("client tried to position minion on occupied slot");
+             return;
+         }
+     } else {
+         // choose an empty slot
+         target_slot = findEmptySlot(player.board);
+         if(target_slot >= 0) {
+             minion.slot = target_slot;
+         } else {
+             console.log("no empty slots were found to position");
+             return;
+         }
+     }
+
+     player.board[target_slot] = minion;
 
      room[0].socket.emit("summon_minion", {user_id:player.id, 'minion': minion});
      room[1].socket.emit("summon_minion", {user_id:player.id, 'minion': minion});
@@ -546,21 +602,21 @@ function initPlayer(socket, id) {
 }
 
 function tryToDraw(player) {
-console.log(player.hand.length + " length of hand");
+    console.log(player.hand.length + " length of hand");
     if(player.hand.length < 4) {
         drawCard(player);
 
         setTimeout(function() {
                 player.deckLock = false;
                 tryToDraw(player);
-        }, 10000);
+        }, DRAW_CARD_COOLDOWN);
     }
 }
 
 function drawCard(player) {
     var crd = player.deck.pop();
     player.hand.push(crd);
-    crd.slot = player.hand.indexOf(crd);
+    crd.slot = player.hand.length-1;
     player.socket.emit("draw_card", {user_id:player.id, card: crd});
 }
 
