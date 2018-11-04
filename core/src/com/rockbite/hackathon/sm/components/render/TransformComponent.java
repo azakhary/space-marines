@@ -2,6 +2,8 @@ package com.rockbite.hackathon.sm.components.render;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -52,5 +54,15 @@ public class TransformComponent implements Component{
     public void initActorIfNotInited() {
         actor.setVisible(false);
         Comm.get().gameLogic.stage.addActor(actor);
+    }
+
+    public float hit(TransformComponent component) {
+        Rectangle rect1 = new Rectangle(x+offsetX, y+offsetY, width, height);
+        Rectangle rect2 = new Rectangle(component.x+component.offsetX, component.y+component.offsetY, component.width, component.height);
+        Rectangle result = new Rectangle();
+        if(Intersector.intersectRectangles(rect1, rect2, result)) {
+            return result.area();
+        }
+        return 0;
     }
 }

@@ -43,5 +43,20 @@ public class CardSystem extends EntitySystem {
             }
         }
     }
+
+    public void removeFromHand(int slot) {
+        for (int i = 0; i < entities.size(); i++) {
+            CardComponent card = mainComponentMapper.get(entities.get(i));
+            if(card.slot == slot && card.playerId == Comm.get().gameLogic.uniqueUserId) {
+                entities.get(i).getComponent(TransformComponent.class).actor.clearActions();
+                shiftSlots(Comm.get().gameLogic.uniqueUserId, slot);
+
+                getEngine().removeEntity(entities.get(i));
+                return;
+            }
+        }
+
+
+    }
 }
 

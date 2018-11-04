@@ -17,6 +17,7 @@ import com.rockbite.hackathon.sm.components.HeroComponent;
 import com.rockbite.hackathon.sm.components.MinionComponent;
 import com.rockbite.hackathon.sm.components.render.TransformComponent;
 import com.rockbite.hackathon.sm.systems.CardSystem;
+import com.rockbite.hackathon.sm.systems.MinionSystem;
 import com.rockbite.hackathon.sm.systems.RenderSystem;
 
 public class InputController {
@@ -89,8 +90,13 @@ public class InputController {
                         // it's card
                         GameComponent game =Comm.get().gameLogic.gameEntity.getComponent(GameComponent.class);
                         int mana = (int) Math.floor(game.mana);
-                        if(tc.y + tc.offsetY > -230f && cardComponent.cost <= mana) {
-                            playCard();
+                        // need to check where minion is dropped.
+                        Integer dropSlotId = Comm.get().gameLogic.getEngine().getSystem(MinionSystem.class).hitPlayerSlot(tc);
+
+                        if(dropSlotId != null && cardComponent.cost <= mana) {
+                            playCard(dropSlotId);
+                            tc.offsetX = 0;
+                            tc.offsetY = 0;
                         } else {
                             tc.offsetX = 0;
                             tc.offsetY = 0;
@@ -134,24 +140,42 @@ public class InputController {
     }
 
 
-    private void playCard() {
+    private void playCard(int slotId) {
+
+        // check if this slot is empty
+        boolean isSlotEmpty = Comm.get().gameLogic.getEngine().getSystem(MinionSystem.class).isSlotEmpty(slotId);
+        if(!isSlotEmpty) return;
+
         //play it
         CardComponent cc = ccMapper.get(draggingEntity);
         PlayCard playCard = Comm.get().getCommand(PlayCard.class);
+        playCard.targetSlot = slotId; // the slot we want to put this minion on
+        playCard.targetPlayer = Comm.get().gameLogic.uniqueUserId; // todo: make this possible to target other player too
+        playCard.targetType = 0; //todo: targeting minion, but make it possible to target hero as well.
         playCard.setCardComponent(cc);
         Comm.get().executeCommand(playCard);
 
-        // remove it
-        int slot = playCard.getCardComponent().slot;
-        Comm.get().gameLogic.getEngine().removeEntity(draggingEntity);
-        // also shift slots
-        Comm.get().gameLogic.getEngine().getSystem(CardSystem.class).shiftSlots(playCard.getCardComponent().playerId, slot);
+        // do some fake hiding animation, which will come back if anything
+        TransformComponent tc = draggingEntity.getComponent(TransformComponent.class);
+        tc.initActorIfNotInited();
+        tc.addAction(Actions.sequence(
+                Actions.fadeOut(0.3f),
+                Actions.delay(1.5f),
+                Actions.fadeIn(0.1f)
+        ));
+        tc.tint.a = 0;
     }
 
     private void playMinion(Entity targetEntity, boolean isHero) {
         if(!isHero) {
             // is minion
             MinionComponent mc = mcMapper.get(draggingEntity);
+
+            if(mc.user_id == targetEntity.getComponent(MinionComponent.class).user_id) {
+                // trying to target friendly minion, this has to be ignored.
+                return;
+            }
+
             if(mc.cooldown > 0) return;
             MinionAttack minionAttack = Comm.get().getCommand(MinionAttack.class);
             minionAttack.fromSlot = mc.slot;

@@ -1,7 +1,9 @@
 package com.rockbite.hackathon.sm.communications;
 
+import com.badlogic.gdx.Gdx;
 import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
+import com.rockbite.hackathon.sm.communications.actions.HandUpdate;
 import com.rockbite.hackathon.sm.communications.actions.HeroSync;
 import com.rockbite.hackathon.sm.communications.actions.MinionAttackAnim;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
@@ -31,151 +33,216 @@ public class Network {
 
                 @Override
                 public void call(Object... args) {
-                    System.out.println("connected to socket. waiting for opponent.");
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println("connected to socket. waiting for opponent.");
 
-                    JSONObject payload = new JSONObject();
-                    try {
-                        payload.put("user_id", Comm.get().gameLogic.uniqueUserId);
-                        socket.emit("join", payload);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                            JSONObject payload = new JSONObject();
+                            try {
+                                payload.put("user_id", Comm.get().gameLogic.uniqueUserId);
+                                socket.emit("join", payload);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+
                 }
 
             }).on("game_started", new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {
-                    JSONObject obj = (JSONObject)args[0];
-                    try {
-                        int user_id = obj.getInt("user_id");
-                        float mana_speed = (float) obj.getDouble("mana_speed");
-                        float cooldown = (float) obj.getDouble("cooldown");
-                        System.out.println("room created with opponent id: " + user_id);
-                        Comm.get().gameLogic.MANA_SPEED = mana_speed;
-                        Comm.get().gameLogic.MAX_COOLDOWN = cooldown;
-                        Comm.get().gameLogic.opponentUserId = user_id;
-                        Comm.get().gameLogic.initGameEntities(obj);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                public void call(final Object... args) {
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSONObject obj = (JSONObject)args[0];
+                            try {
+                                int user_id = obj.getInt("user_id");
+                                float mana_speed = (float) obj.getDouble("mana_speed");
+                                float cooldown = (float) obj.getDouble("cooldown");
+                                System.out.println("room created with opponent id: " + user_id);
+                                Comm.get().gameLogic.MANA_SPEED = mana_speed;
+                                Comm.get().gameLogic.MAX_COOLDOWN = cooldown;
+                                Comm.get().gameLogic.opponentUserId = user_id;
+                                Comm.get().gameLogic.initGameEntities(obj);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 }
 
             }).on("init_deck", new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {
-                    JSONObject obj = (JSONObject)args[0];
-                    try {
-                        int user_id = obj.getInt("user_id");
-                        int deck_size = obj.getInt("deck_size");
-                        System.out.println("deck info received: " + deck_size + " cards");
-                        Comm.get().gameLogic.createDeck(user_id, deck_size);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
+                public void call(final Object... args) {
+                   Gdx.app.postRunnable(new Runnable() {
+                       @Override
+                       public void run() {
+                           JSONObject obj = (JSONObject)args[0];
+                           try {
+                               int user_id = obj.getInt("user_id");
+                               int deck_size = obj.getInt("deck_size");
+                               System.out.println("deck info received: " + deck_size + " cards");
+                               Comm.get().gameLogic.createDeck(user_id, deck_size);
+                           } catch (JSONException e) {
+                               e.printStackTrace();
+                           }
+                       }
+                   });
                 }
             }).on("summon_minion", new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {
-                    JSONObject obj = (JSONObject)args[0];
-                    try {
-                        int user_id = obj.getInt("user_id");
-                        JSONObject minionJson = obj.getJSONObject("minion");
-                        SummonMinion action = Comm.get().getAction(SummonMinion.class);
-                        action.set(user_id, minionJson);
-                        Comm.get().sendAction(action);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
+                public void call(final Object... args) {
+                   Gdx.app.postRunnable(new Runnable() {
+                       @Override
+                       public void run() {
+                           JSONObject obj = (JSONObject)args[0];
+                           try {
+                               int user_id = obj.getInt("user_id");
+                               JSONObject minionJson = obj.getJSONObject("minion");
+                               SummonMinion action = Comm.get().getAction(SummonMinion.class);
+                               action.set(user_id, minionJson);
+                               Comm.get().sendAction(action);
+                           } catch (JSONException e) {
+                               e.printStackTrace();
+                           }
+                       }
+                   });
                 }
             }).on("minion_attack_animation", new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {
-                    JSONObject obj = (JSONObject)args[0];
-                    try {
-                        int user_id = obj.getInt("user_id");
+                public void call(final Object... args) {
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSONObject obj = (JSONObject)args[0];
+                            try {
+                                int user_id = obj.getInt("user_id");
 
-                        MinionAttackAnim action = Comm.get().getAction(MinionAttackAnim.class);
-                        action.set(user_id, obj);
-                        Comm.get().sendAction(action);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                                MinionAttackAnim action = Comm.get().getAction(MinionAttackAnim.class);
+                                action.set(user_id, obj);
+                                Comm.get().sendAction(action);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                }
+            }).on("hand_update", new Emitter.Listener() {
 
+                @Override
+                public void call(final Object... args) {
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSONObject obj = (JSONObject)args[0];
+                            try {
+                                int user_id = obj.getInt("user_id");
+                                int slot_id = obj.getInt("slot_to_remove");
+
+                                HandUpdate action = Comm.get().getAction(HandUpdate.class);
+                                action.slotToRemove = slot_id;
+                                Comm.get().sendAction(action);
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 }
             }).on("minion_update", new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {
-                    JSONObject obj = (JSONObject)args[0];
-                    try {
-                        int user_id = obj.getInt("user_id");
-                        int slot_id = obj.getInt("slot_id");
-                        JSONObject minionJson = obj.getJSONObject("minion");
+                public void call(final Object... args) {
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println("got minion update call from server");
+                            JSONObject obj = (JSONObject)args[0];
+                            try {
+                                int user_id = obj.getInt("user_id");
+                                int slot_id = obj.getInt("slot_id");
+                                JSONObject minionJson = obj.getJSONObject("minion");
 
-                        MinionUpdate minionUpdate = Comm.get().getAction(MinionUpdate.class);
-                        minionUpdate.set(user_id, slot_id, minionJson);
-                        Comm.get().sendAction(minionUpdate);
+                                MinionUpdate minionUpdate = Comm.get().getAction(MinionUpdate.class);
+                                minionUpdate.set(user_id, slot_id, minionJson);
+                                Comm.get().sendAction(minionUpdate);
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 }
             }).on("hero_sync", new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {
-                    JSONObject obj = (JSONObject)args[0];
-                    System.out.println("hero sync response is received");
-                    try {
-                        int user_id = obj.getInt("user_id");
-                        HeroSync action = Comm.get().getAction(HeroSync.class);
-                        action.set(user_id, obj);
-                        Comm.get().sendAction(action);
+                public void call(final Object... args) {
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSONObject obj = (JSONObject)args[0];
+                            System.out.println("hero sync response is received");
+                            try {
+                                int user_id = obj.getInt("user_id");
+                                HeroSync action = Comm.get().getAction(HeroSync.class);
+                                action.set(user_id, obj);
+                                Comm.get().sendAction(action);
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 }
             }).on("draw_card", new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {
-                    JSONObject obj = (JSONObject)args[0];
-                    try {
-                        int user_id = obj.getInt("user_id");
-                        JSONObject cardJson = obj.getJSONObject("card");
+                public void call(final Object... args) {
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSONObject obj = (JSONObject)args[0];
+                            try {
+                                int user_id = obj.getInt("user_id");
+                                JSONObject cardJson = obj.getJSONObject("card");
 
-                        CardDrawn action = Comm.get().getAction(CardDrawn.class);
-                        CardComponent component = Comm.get().gameLogic.getEngine().createComponent(CardComponent.class);
-                        component.load(user_id, cardJson);
-                        action.setCard(component);
-                        Comm.get().sendAction(action);
+                                CardDrawn action = Comm.get().getAction(CardDrawn.class);
+                                CardComponent component = Comm.get().gameLogic.getEngine().createComponent(CardComponent.class);
+                                component.load(user_id, cardJson);
+                                action.setCard(component);
+                                Comm.get().sendAction(action);
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 }
             }).on("show_emoji", new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {
-                    JSONObject obj = (JSONObject)args[0];
-                    short emojiCode = 0;
-                    try {
-                        emojiCode = (short) obj.getInt("emoji_code");
-                        EmojiShown action = Comm.get().getAction(EmojiShown.class);
-                        action.set(emojiCode);
-                        Comm.get().sendAction(action);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                public void call(final Object... args) {
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSONObject obj = (JSONObject)args[0];
+                            short emojiCode = 0;
+                            try {
+                                emojiCode = (short) obj.getInt("emoji_code");
+                                EmojiShown action = Comm.get().getAction(EmojiShown.class);
+                                action.set(emojiCode);
+                                Comm.get().sendAction(action);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 }
 
             }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {

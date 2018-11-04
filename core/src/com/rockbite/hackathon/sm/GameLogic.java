@@ -15,6 +15,7 @@ import com.rockbite.hackathon.sm.communications.Network;
 import com.rockbite.hackathon.sm.communications.Observer;
 import com.rockbite.hackathon.sm.communications.actions.CardDrawn;
 import com.rockbite.hackathon.sm.communications.actions.EmojiShown;
+import com.rockbite.hackathon.sm.communications.actions.HandUpdate;
 import com.rockbite.hackathon.sm.communications.actions.HeroSync;
 import com.rockbite.hackathon.sm.communications.actions.MinionAttackAnim;
 import com.rockbite.hackathon.sm.communications.actions.MinionUpdate;
@@ -167,6 +168,7 @@ public class GameLogic implements Observer  {
         cards.add(new Array<Entity>());
         cards.add(new Array<Entity>());
 
+        engine.getSystem(MinionSystem.class).createSlots();
 
         createDeck(1, 30);
 
@@ -195,6 +197,7 @@ public class GameLogic implements Observer  {
         Comm.get().registerObserver(this, HeroSync.class);
         Comm.get().registerObserver(this, MinionAttackAnim.class);
         Comm.get().registerObserver(this, SummonMinion.class);
+        Comm.get().registerObserver(this, HandUpdate.class);
     }
 
     @Override
@@ -219,7 +222,7 @@ public class GameLogic implements Observer  {
             cardEntity.add(transformComponent);
             engine.addEntity(cardEntity);
 
-            System.out.println("draw card " + cardDrawn.getComponent().title);
+            System.out.println("draw card " + cardDrawn.getComponent().title + " to slot " + cardDrawn.getComponent().slot );
 
             transformComponent.initActorIfNotInited();
             transformComponent.actor.addAction(
@@ -265,6 +268,14 @@ public class GameLogic implements Observer  {
             summonMinion(act.user_id, act.minionJson, act);
         }
 
+        if(action instanceof HandUpdate) {
+            final HandUpdate act = (HandUpdate) action;
+            int slot = act.slotToRemove;
+
+            // remove it
+            Comm.get().gameLogic.getEngine().getSystem(CardSystem.class).removeFromHand(slot);
+            action.setDoneDisplaying(true);
+        }
 
         if(action instanceof MinionAttackAnim) {
             final MinionAttackAnim act = (MinionAttackAnim) action;
